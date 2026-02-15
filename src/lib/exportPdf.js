@@ -116,7 +116,7 @@ export async function generatePdf() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(...COLORS.muted);
-  doc.text('— Prophet Muhammad \u2E28 (Bukhari & Muslim)', w / 2, 135 + coverLines.length * 4 + 3, { align: 'center' });
+  doc.text('— Prophet Muhammad (peace be upon him) (Bukhari & Muslim)', w / 2, 135 + coverLines.length * 4 + 3, { align: 'center' });
 
   addPageFooter(doc, pageNum.val);
 
