@@ -53,8 +53,10 @@ export default function DailyPage() {
           });
         }
       });
+    } else {
+      setPrayerTimes(null);
     }
-  }, [loaded, day]);
+  }, [loaded, data?.id]);
 
   if (!loaded || !data) return <div className="p-8 text-center text-[var(--muted)]">Loading...</div>;
 
