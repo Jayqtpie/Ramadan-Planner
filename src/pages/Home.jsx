@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import logo from '../assets/logo.png';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function Home() {
         <p className="spaced-caps text-[var(--accent)] mb-2">The Ramadan Reset Planner</p>
         <h1 className="text-3xl font-extrabold mb-1">Welcome</h1>
         <p className="text-white/70 text-sm">by GuidedBarakah</p>
-        <div className="text-4xl mt-4 text-[var(--accent)]">☾</div>
+        <img src={logo} alt="GuidedBarakah" className="w-20 h-20 mx-auto mt-4 object-contain" />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
