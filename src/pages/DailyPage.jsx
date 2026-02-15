@@ -5,7 +5,7 @@ import SectionBar from '../components/SectionBar';
 import StarRating from '../components/StarRating';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 
 const PRAYERS = [
   { key: 'fajr', label: 'Fajr' },
@@ -36,6 +36,7 @@ export default function DailyPage() {
 
   const hadith = HADITHS[day - 1];
   const muhasabah = MUHASABAH[day - 1];
+  const laylatAlQadrNight = [20, 22, 24, 26, 28].includes(day) ? day + 1 : null;
 
   const set = (field, value) => update({ ...data, [field]: value });
   const setSalah = (prayer, key, val) => {
@@ -52,6 +53,43 @@ export default function DailyPage() {
     const arr = [...data[field]];
     arr[i] = val;
     update({ ...data, [field]: arr });
+  };
+
+  const handleShare = async () => {
+    const salah = data.salahTracker || {};
+    const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+    const done = prayers.filter(p => salah[p]?.done).length;
+    const onTime = prayers.filter(p => salah[p]?.onTime === 'Y').length;
+    const extras = ['taraweeh', 'tahajjud'].filter(p => salah[p]?.done).map(p => p.charAt(0).toUpperCase() + p.slice(1));
+    const pages = parseInt(data.quranProgress?.pages) || 0;
+    const deeds = Object.entries(data.goodDeeds || {}).filter(([, v]) => v === true).length;
+    const water = data.mealPlanner?.waterIntake || 0;
+    const gratitudes = (data.gratitude || []).filter(g => g);
+
+    const lines = [
+      `\u2728 Ramadan Day ${day} \u2728`,
+      '',
+      `\uD83D\uDD4C Prayers: ${done}/5${onTime ? ` (${onTime} on time)` : ''}`,
+    ];
+    if (extras.length) lines.push(`\uD83C\uDF19 ${extras.join(' + ')}`);
+    if (data.khushuRating) lines.push(`\uD83D\uDE4F Khushu\': ${'⭐'.repeat(data.khushuRating)}`);
+    if (pages) lines.push(`\uD83D\uDCD6 Quran: ${pages} pages`);
+    if (deeds) lines.push(`\u2764\uFE0F Good deeds: ${deeds}`);
+    if (water) lines.push(`\uD83D\uDCA7 Water: ${water}/8 glasses`);
+    if (gratitudes.length) lines.push(`\uD83E\uDD32 Grateful for: ${gratitudes.join(', ')}`);
+    lines.push('', 'Tracked with The Ramadan Reset Planner by GuidedBarakah');
+
+    const text = lines.join('\n');
+    if (navigator.share) {
+      try { await navigator.share({ title: `Ramadan Day ${day}`, text }); } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Copied to clipboard!');
+      } catch {
+        prompt('Copy your summary:', text);
+      }
+    }
   };
 
   return (
@@ -73,6 +111,12 @@ export default function DailyPage() {
             </div>
             <h1 className="text-xl font-extrabold">Day {day}</h1>
             <p className="text-white/60 text-xs">of Ramadan</p>
+            {laylatAlQadrNight && (
+              <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.65rem] font-bold tracking-wide" style={{ background: 'rgba(200,169,110,0.2)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.4)' }}>
+                <span>☾</span>
+                <span>Potential Laylat al-Qadr tonight ({laylatAlQadrNight}{laylatAlQadrNight === 21 ? 'st' : laylatAlQadrNight === 23 ? 'rd' : 'th'} night)</span>
+              </div>
+            )}
           </div>
           <button
             onClick={() => day < 30 && navigate(`/daily/${day + 1}`)}
@@ -99,6 +143,14 @@ export default function DailyPage() {
             className="flex-1 text-xs !bg-white/10 !border-white/20 !text-white placeholder:text-white/40"
           />
         </div>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 mx-auto mt-3 px-3 py-1.5 rounded-full text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all"
+          aria-label="Share this day"
+        >
+          <Share2 size={14} />
+          <span>Share Day {day}</span>
+        </button>
       </div>
 
       {/* Day selector strip */}
