@@ -91,7 +91,7 @@ function UnlockScreen({ onUnlock }) {
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6" style={{ background: 'var(--bg, #FAF8F3)' }}>
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
-          <img src={unlockLogo} alt="GuidedBarakah" className="w-40 mx-auto mb-6 object-contain" />
+          <img src={unlockLogo} alt="GuidedBarakah" className="w-56 mx-auto mb-6 object-contain" />
           <p className="spaced-caps text-[var(--accent)] mb-2">The Ramadan Reset Planner</p>
           <h1 className="text-2xl font-extrabold mb-1" style={{ color: 'var(--primary)' }}>Welcome</h1>
           <p className="text-[var(--muted)] text-sm">Enter your unique code to unlock</p>
