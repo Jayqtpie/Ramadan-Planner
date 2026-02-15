@@ -108,7 +108,7 @@ function UnlockScreen({ onUnlock }) {
               autoCapitalize="characters"
               autoCorrect="off"
               spellCheck="false"
-              className="w-full py-3 pl-10 pr-4 rounded-xl text-sm font-mono font-bold tracking-wider text-center"
+              className="w-full py-3 pl-10 pr-4 rounded-xl text-base font-mono font-bold tracking-wider text-center"
               style={{ background: 'white', color: 'var(--primary)', border: error ? '2px solid #FCA5A5' : '2px solid #E2E8F0' }}
             />
           </div>
