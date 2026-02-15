@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { getSetting } from './lib/db';
-import { Home as HomeIcon, BookOpen, BookMarked, Moon, Settings as SettingsIcon } from 'lucide-react';
+import { getSetting, setSetting } from './lib/db';
+import { Home as HomeIcon, BookOpen, BookMarked, Moon, Settings as SettingsIcon, Lock } from 'lucide-react';
+import unlockLogo from './assets/logo-full.png';
 
 const Home = lazy(() => import('./pages/Home'));
 const Niyyah = lazy(() => import('./pages/Niyyah'));
@@ -14,6 +15,102 @@ const LastTenNights = lazy(() => import('./pages/LastTenNights'));
 const EidChecklist = lazy(() => import('./pages/EidChecklist'));
 const PostRamadan = lazy(() => import('./pages/PostRamadan'));
 const SettingsPage = lazy(() => import('./pages/Settings'));
+
+/**
+ * Unique code validation system.
+ * Codes follow the format: GB-XXXX-XXXX (e.g. GB-7K3M-9P2N)
+ * Each code is validated by checking that its characters produce
+ * a valid checksum when combined with a secret key.
+ *
+ * To generate codes, use: node scripts/generate-codes.js <count>
+ */
+const SECRET_KEY = 'barakah2026ramadan';
+
+function validateCode(code) {
+  const cleaned = code.trim().toUpperCase().replace(/\s+/g, '');
+  // Accept format GB-XXXX-XXXX or GBXXXXXXXX
+  const match = cleaned.match(/^GB-?([A-Z0-9]{4})-?([A-Z0-9]{4})$/);
+  if (!match) return false;
+
+  const body = match[1] + match[2]; // 8 chars
+  const payload = body.slice(0, 6);
+  const check = body.slice(6, 8);
+
+  // Compute checksum from payload + secret
+  let hash = 0;
+  const str = payload + SECRET_KEY;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // no I, O (avoid confusion)
+  const c1 = chars[Math.abs(hash) % chars.length];
+  const c2 = chars[Math.abs(hash >> 8) % chars.length];
+
+  return check === c1 + c2;
+}
+
+function UnlockScreen({ onUnlock }) {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const [checking, setChecking] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setChecking(true);
+    setError('');
+
+    if (validateCode(code)) {
+      await setSetting('unlocked', true);
+      await setSetting('unlockCode', code.trim().toUpperCase());
+      onUnlock();
+    } else {
+      setError('Invalid code. Please check your order confirmation email.');
+      setChecking(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6" style={{ background: 'var(--bg, #FAF8F3)' }}>
+      <div className="w-full max-w-sm animate-fade-in">
+        <div className="text-center mb-8">
+          <img src={unlockLogo} alt="GuidedBarakah" className="w-40 mx-auto mb-6 object-contain" />
+          <p className="spaced-caps text-[var(--accent)] mb-2">The Ramadan Reset Planner</p>
+          <h1 className="text-2xl font-extrabold mb-1" style={{ color: 'var(--primary)' }}>Welcome</h1>
+          <p className="text-[var(--muted)] text-sm">Enter your unique code to unlock</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="relative">
+            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--muted)' }} />
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => { setCode(e.target.value); setError(''); }}
+              placeholder="GB-XXXX-XXXX"
+              autoFocus
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck="false"
+              className="w-full py-3 pl-10 pr-4 rounded-xl text-sm font-mono font-bold tracking-wider text-center"
+              style={{ background: 'white', color: 'var(--primary)', border: error ? '2px solid #FCA5A5' : '2px solid #E2E8F0' }}
+            />
+          </div>
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          <button
+            type="submit"
+            disabled={checking || !code.trim()}
+            className="w-full py-3 rounded-xl font-bold text-sm text-white disabled:opacity-50 transition-all"
+            style={{ background: 'var(--primary)' }}
+          >
+            {checking ? 'Verifying...' : 'Unlock Planner'}
+          </button>
+        </form>
+        <p className="text-[var(--muted)] text-[0.65rem] text-center mt-6 leading-relaxed">
+          Your unique code was included in your order confirmation email. If you can't find it, contact us at support@guidedbarakah.com
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function Loader() {
   return (
@@ -94,10 +191,15 @@ function AppContent({ theme, setTheme }) {
 export default function App() {
   const [theme, setTheme] = useState('forest');
   const [ready, setReady] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
 
   useEffect(() => {
-    getSetting('theme').then((t) => {
+    Promise.all([
+      getSetting('theme'),
+      getSetting('unlocked'),
+    ]).then(([t, u]) => {
       if (t) setTheme(t);
+      if (u) setUnlocked(true);
       setReady(true);
     });
   }, []);
@@ -107,6 +209,10 @@ export default function App() {
   }, [theme]);
 
   if (!ready) return <Loader />;
+
+  if (!unlocked) {
+    return <UnlockScreen onUnlock={() => setUnlocked(true)} />;
+  }
 
   return (
     <BrowserRouter>
