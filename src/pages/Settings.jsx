@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { getSetting, setSetting, exportAllData, importAllData, clearAllData } from '../lib/db';
-import { generatePdf } from '../lib/exportPdf';
 import { shareProgress } from '../lib/shareProgress';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
@@ -29,6 +28,7 @@ export default function Settings({ theme, onThemeChange }) {
   const handleExportPdf = async () => {
     setExporting(true);
     try {
+      const { generatePdf } = await import('../lib/exportPdf');
       await generatePdf();
     } catch (err) {
       console.error('PDF export error:', err);

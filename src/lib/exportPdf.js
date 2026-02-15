@@ -507,13 +507,31 @@ export async function generatePdf() {
   // Final page footer
   addPageFooter(doc, pageNum.val);
 
-  // Save — use bloburl for iOS Safari compatibility
+  // Save — multiple strategies for cross-browser/PWA compatibility
   const filename = `My-Ramadan-Journey-${new Date().toISOString().split('T')[0]}.pdf`;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS) {
-    const blobUrl = doc.output('bloburl');
-    window.open(blobUrl, '_blank');
-  } else {
-    doc.save(filename);
+  const blob = doc.output('blob');
+
+  // Try Web Share API first (works great on iOS PWA)
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/pdf' })] })) {
+    try {
+      await navigator.share({
+        files: [new File([blob], filename, { type: 'application/pdf' })],
+        title: 'My Ramadan Journey',
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      // Fall through to other methods
+    }
   }
+
+  // Try anchor download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
