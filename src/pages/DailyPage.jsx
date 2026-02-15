@@ -136,7 +136,7 @@ export default function DailyPage() {
   return (
     <div className="animate-fade-in" key={day}>
       {/* Header */}
-      <div className="geo-pattern rounded-b-3xl px-5 py-6 text-white" style={{ background: 'var(--primary)' }}>
+      <div className="geo-pattern rounded-b-3xl px-5 py-10 text-white" style={{ background: 'var(--primary)', paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))' }}>
         <div className="flex justify-end max-w-2xl mx-auto" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           <button
             onClick={handleShare}
