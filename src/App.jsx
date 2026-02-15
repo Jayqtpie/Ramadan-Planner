@@ -92,7 +92,7 @@ function UnlockScreen({ onUnlock }) {
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6" style={{ background: 'var(--bg, #FAF8F3)' }}>
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
-          <img src={unlockLogo} alt="GuidedBarakah" className="w-56 mx-auto mb-6 object-contain" />
+          <img src={unlockLogo} alt="GuidedBarakah" className="w-72 mx-auto mb-6 object-contain" />
           <p className="spaced-caps text-[var(--accent)] mb-2">The Ramadan Reset Planner</p>
           <h1 className="text-2xl font-extrabold mb-1" style={{ color: 'var(--primary)' }}>Welcome</h1>
           <p className="text-[var(--muted)] text-sm">Enter your unique code to unlock</p>
@@ -124,7 +124,7 @@ function UnlockScreen({ onUnlock }) {
           </button>
         </form>
         <p className="text-[var(--muted)] text-[0.65rem] text-center mt-6 leading-relaxed">
-          Your unique code was included in your order confirmation email. If you can't find it, contact us at support@guidedbarakah.com
+          Your unique code was included in your order confirmation email. If you can't find it, contact us at jay@guidedbarakah.com
         </p>
       </div>
     </div>
