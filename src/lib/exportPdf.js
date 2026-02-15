@@ -131,7 +131,7 @@ export async function generatePdf() {
   y = sectionHeading(doc, y, '\u2738  MY NIYYAH (Intention)', COLORS.accent);
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor([45, 52, 54]);
+  doc.setTextColor(...COLORS.body);
 
   y = labelValue(doc, y, 'Why I fast:', niyyah.whyFasting, pageNum);
   y += 2;
@@ -507,6 +507,13 @@ export async function generatePdf() {
   // Final page footer
   addPageFooter(doc, pageNum.val);
 
-  // Save
-  doc.save(`My-Ramadan-Journey-${new Date().toISOString().split('T')[0]}.pdf`);
+  // Save — use bloburl for iOS Safari compatibility
+  const filename = `My-Ramadan-Journey-${new Date().toISOString().split('T')[0]}.pdf`;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    const blobUrl = doc.output('bloburl');
+    window.open(blobUrl, '_blank');
+  } else {
+    doc.save(filename);
+  }
 }

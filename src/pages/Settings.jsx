@@ -31,8 +31,8 @@ export default function Settings({ theme, onThemeChange }) {
     try {
       await generatePdf();
     } catch (err) {
-      alert('Something went wrong generating your PDF. Please try again.');
-      console.error(err);
+      console.error('PDF export error:', err);
+      alert(`PDF error: ${err.message || err}`);
     }
     setExporting(false);
   };
