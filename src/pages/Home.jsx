@@ -22,7 +22,7 @@ export default function Home() {
             <span className="font-bold text-[var(--primary)]">Assalamu alaikum,</span>
           </p>
           <p className="text-sm leading-relaxed text-[var(--body)]">
-            If you're holding this planner, it means you're serious about making this Ramadan count. You're not just planning to fast — you're planning to transform.
+            If you're reading this planner, it means you're serious about making this Ramadan count. You're not just planning to fast — you're planning to transform.
           </p>
           <p className="text-sm leading-relaxed text-[var(--body)] mt-3">
             This planner was designed to give you structure without rigidity, accountability without guilt, and a system that works with your faith — not against it. Every page is built around the rhythms of Ramadan: the pre-dawn quiet of suhoor, the five daily prayers that anchor your day, the communal breaking of fast, and the deep worship of the night.
