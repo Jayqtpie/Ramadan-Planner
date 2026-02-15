@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { getSetting } from './lib/db';
 import { Home as HomeIcon, BookOpen, BookMarked, Moon, Settings as SettingsIcon } from 'lucide-react';
 
@@ -109,8 +109,8 @@ export default function App() {
   if (!ready) return <Loader />;
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppContent theme={theme} setTheme={setTheme} />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
