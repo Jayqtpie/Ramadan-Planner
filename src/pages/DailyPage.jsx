@@ -246,7 +246,7 @@ export default function DailyPage() {
                         key={i}
                         type="button"
                         className={`water-glass ${i < (data.mealPlanner.waterIntake || 0) ? 'filled' : ''}`}
-                        onClick={() => setMeal('waterIntake', null, i + 1 === data.mealPlanner.waterIntake ? 0 : i + 1)}
+                        onClick={() => update({ ...data, mealPlanner: { ...data.mealPlanner, waterIntake: i + 1 === data.mealPlanner.waterIntake ? 0 : i + 1 } })}
                         aria-label={`${i + 1} glasses`}
                       >
                         💧
