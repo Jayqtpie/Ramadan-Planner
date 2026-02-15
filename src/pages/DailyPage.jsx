@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { getDefaultDailyPage, HADITHS, MUHASABAH } from '../lib/data';
 import { getPrayerTimesForDay } from '../lib/prayerTimes';
+import { getSetting, setSetting } from '../lib/db';
 import SectionBar from '../components/SectionBar';
 import StarRating from '../components/StarRating';
 import SavedToast from '../components/SavedToast';
@@ -56,6 +57,20 @@ export default function DailyPage() {
     } else {
       setPrayerTimes(null);
     }
+  }, [loaded, data?.id]);
+
+  // Auto-fill Gregorian date from Day 1's date
+  useEffect(() => {
+    if (!loaded || !data || data.date) return;
+    if (day === 1) return; // Day 1 is set manually by the user
+    getSetting('ramadanStartDate').then((startDate) => {
+      if (startDate) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + (day - 1));
+        const filled = d.toISOString().split('T')[0];
+        update({ ...data, date: filled });
+      }
+    });
   }, [loaded, data?.id]);
 
   if (!loaded || !data) return <div className="p-8 text-center text-[var(--muted)]">Loading...</div>;
@@ -168,14 +183,19 @@ export default function DailyPage() {
           <input
             type="date"
             value={data.date}
-            onChange={(e) => set('date', e.target.value)}
+            onChange={(e) => {
+              set('date', e.target.value);
+              if (day === 1 && e.target.value) {
+                setSetting('ramadanStartDate', e.target.value);
+              }
+            }}
             className="flex-1 text-xs !bg-white/10 !border-white/20 !text-white placeholder:text-white/40"
           />
           <input
             type="text"
             value={data.hijriDate}
             onChange={(e) => set('hijriDate', e.target.value)}
-            placeholder="__ Ramadan 1447 AH"
+            placeholder="Hijri date"
             className="flex-1 text-xs !bg-white/10 !border-white/20 !text-white placeholder:text-white/40"
           />
         </div>

@@ -135,7 +135,7 @@ export function getDefaultDailyPage(day) {
   return {
     id: `day-${day}`,
     date: '',
-    hijriDate: '',
+    hijriDate: `${day} Ramadan 1447 AH`,
     todaysNiyyah: '',
     salahTracker: {
       fajr: { done: false, onTime: '' },
