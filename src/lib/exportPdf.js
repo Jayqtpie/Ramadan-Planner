@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { exportAllData } from './db';
 import { HADITHS, MUHASABAH, EID_BEFORE, EID_DAY } from './data';
 
@@ -288,7 +288,7 @@ export async function generatePdf() {
 
   // Daily summary table
   if (tableBody.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       head: [['Day', 'Salah', 'On Time', 'Khushu\'', 'Quran Pg', 'Deeds', 'Water']],
       body: tableBody,
