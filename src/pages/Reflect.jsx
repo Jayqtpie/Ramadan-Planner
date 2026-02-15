@@ -14,7 +14,7 @@ export default function Reflect() {
 
   return (
     <div className="animate-fade-in">
-      <div className="geo-pattern rounded-b-3xl px-5 pb-8 text-center text-white" style={{ background: 'var(--primary)', paddingTop: 'calc(1.25rem + env(safe-area-inset-top, 0px))' }}>
+      <div className="geo-pattern rounded-b-3xl px-5 py-8 text-center text-white" style={{ background: 'var(--primary)' }}>
         <p className="spaced-caps text-[var(--accent)] mb-1">Reflect & Review</p>
         <h1 className="text-2xl font-extrabold">Your Journey</h1>
       </div>
