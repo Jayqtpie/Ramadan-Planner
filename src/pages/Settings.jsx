@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getSetting, setSetting, exportAllData, importAllData, clearAllData } from '../lib/db';
 import { shareProgress } from '../lib/shareProgress';
+import { getLocation, setupLocation, clearLocation } from '../lib/prayerTimes';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload } from 'lucide-react';
+import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin } from 'lucide-react';
 
 const THEMES = [
   { id: 'forest', name: 'Forest', primary: '#1B4332', secondary: '#2D6A4F', bg: '#FAF8F3' },
@@ -15,6 +16,36 @@ export default function Settings({ theme, onThemeChange }) {
   const [showSaved, setShowSaved] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationLoaded, setLocationLoaded] = useState(false);
+
+  useEffect(() => {
+    getLocation().then((loc) => {
+      if (loc) setLocation(loc);
+      setLocationLoaded(true);
+    });
+  }, []);
+
+  const handleEnableLocation = async () => {
+    setLocationLoading(true);
+    try {
+      const loc = await setupLocation();
+      setLocation(loc);
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 1300);
+    } catch (err) {
+      alert(err.message);
+    }
+    setLocationLoading(false);
+  };
+
+  const handleDisableLocation = async () => {
+    await clearLocation();
+    setLocation(null);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 1300);
+  };
 
   const changeTheme = async (id) => {
     await setSetting('theme', id);
@@ -130,6 +161,53 @@ export default function Settings({ theme, onThemeChange }) {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Prayer Times Location */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+          <div className="section-bar section-bar-gold">
+            <MapPin size={16} /> <span>PRAYER TIMES</span>
+          </div>
+          <div className="card-body">
+            {!locationLoaded ? (
+              <p className="text-sm text-[var(--muted)]">Loading...</p>
+            ) : location ? (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(200,169,110,0.15)' }}>
+                    <MapPin size={16} style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>{location.city || 'Location set'}</p>
+                    <p className="text-[0.65rem] text-[var(--muted)]">Fajr & Maghrib times will auto-fill on daily pages</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleDisableLocation}
+                  className="text-xs text-[var(--muted)] underline hover:text-red-500 transition-colors"
+                >
+                  Remove location
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-[var(--body)] leading-relaxed mb-3">
+                  Enable location to automatically fill in Fajr (suhoor) and Maghrib (iftar) times on your daily pages.
+                </p>
+                <button
+                  onClick={handleEnableLocation}
+                  disabled={locationLoading}
+                  className="w-full py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                  style={{ background: 'var(--primary)' }}
+                >
+                  {locationLoading ? 'Getting location...' : 'Enable Prayer Times'}
+                </button>
+                <p className="text-[0.6rem] text-[var(--muted)] mt-2 leading-relaxed text-center">
+                  Prayer times are based on your general location and may not be completely accurate. Please verify with your local masjid.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

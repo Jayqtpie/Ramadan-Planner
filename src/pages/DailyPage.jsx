@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { getDefaultDailyPage, HADITHS, MUHASABAH } from '../lib/data';
+import { getPrayerTimesForDay } from '../lib/prayerTimes';
 import SectionBar from '../components/SectionBar';
 import StarRating from '../components/StarRating';
 import SavedToast from '../components/SavedToast';
@@ -31,6 +33,28 @@ export default function DailyPage() {
   const day = Math.min(30, Math.max(1, parseInt(dayParam) || 1));
   const navigate = useNavigate();
   const { data, update, loaded, showSaved } = useAutoSave('dailyPages', `day-${day}`, () => getDefaultDailyPage(day));
+
+  const [prayerTimes, setPrayerTimes] = useState(null);
+
+  useEffect(() => {
+    if (!loaded || !data) return;
+    // Only auto-fill if both times are empty (don't overwrite manual entries)
+    if (!data.mealPlanner.suhoor.time && !data.mealPlanner.iftar.time) {
+      getPrayerTimesForDay(day).then((times) => {
+        if (times) {
+          setPrayerTimes(times);
+          update({
+            ...data,
+            mealPlanner: {
+              ...data.mealPlanner,
+              suhoor: { ...data.mealPlanner.suhoor, time: times.fajr },
+              iftar: { ...data.mealPlanner.iftar, time: times.maghrib },
+            },
+          });
+        }
+      });
+    }
+  }, [loaded, day]);
 
   if (!loaded || !data) return <div className="p-8 text-center text-[var(--muted)]">Loading...</div>;
 
@@ -281,16 +305,31 @@ export default function DailyPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-bold">Suhoor</span>
-                    <input type="time" value={data.mealPlanner.suhoor.time} onChange={(e) => setMeal('suhoor', 'time', e.target.value)} className="!w-auto text-xs" />
+                    <div className="flex items-center gap-2">
+                      {prayerTimes && <span className="text-[0.6rem] text-[var(--accent)]">Fajr</span>}
+                      <input type="time" value={data.mealPlanner.suhoor.time} onChange={(e) => setMeal('suhoor', 'time', e.target.value)} className="!w-auto text-xs" />
+                    </div>
                   </div>
                   <textarea rows={2} value={data.mealPlanner.suhoor.notes} onChange={(e) => setMeal('suhoor', 'notes', e.target.value)} placeholder="Suhoor meal notes..." />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-bold">Iftar</span>
-                    <input type="time" value={data.mealPlanner.iftar.time} onChange={(e) => setMeal('iftar', 'time', e.target.value)} className="!w-auto text-xs" />
+                    <div className="flex items-center gap-2">
+                      {prayerTimes && <span className="text-[0.6rem] text-[var(--accent)]">Maghrib</span>}
+                      <input type="time" value={data.mealPlanner.iftar.time} onChange={(e) => setMeal('iftar', 'time', e.target.value)} className="!w-auto text-xs" />
+                    </div>
                   </div>
                   <textarea rows={2} value={data.mealPlanner.iftar.notes} onChange={(e) => setMeal('iftar', 'notes', e.target.value)} placeholder="Iftar meal notes..." />
+                </div>
+                <div className="rounded-lg p-3" style={{ borderLeft: '3px solid var(--accent)', background: 'linear-gradient(135deg, rgba(200,169,110,0.08), rgba(200,169,110,0.03))' }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[var(--accent)]">☾</span>
+                    <span className="text-[0.65rem] font-bold text-[var(--accent)] uppercase tracking-wider">Dua for Breaking Fast</span>
+                  </div>
+                  <p className="text-sm italic leading-relaxed text-[var(--body)]">"Allahumma inni laka sumtu, wa bika aamantu, wa 'ala rizqika aftartu."</p>
+                  <p className="text-xs text-[var(--muted)] mt-1.5">O Allah, I fasted for You, I believed in You, and I break my fast with Your provision.</p>
+                  <p className="text-[0.6rem] text-[var(--muted)] mt-1">— Abu Dawud, 2358</p>
                 </div>
                 <div>
                   <span className="text-sm font-medium mb-1 block">Water Intake</span>

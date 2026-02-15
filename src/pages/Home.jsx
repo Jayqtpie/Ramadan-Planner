@@ -1,10 +1,34 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getLocation, setupLocation } from '../lib/prayerTimes';
 import Footer from '../components/Footer';
 import logo from '../assets/logo.png';
+import { MapPin } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
   const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const [location, setLocation] = useState(null);
+  const [locationLoaded, setLocationLoaded] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  useEffect(() => {
+    getLocation().then((loc) => {
+      if (loc) setLocation(loc);
+      setLocationLoaded(true);
+    });
+  }, []);
+
+  const handleEnableLocation = async () => {
+    setLocationLoading(true);
+    try {
+      const loc = await setupLocation();
+      setLocation(loc);
+    } catch (err) {
+      alert(err.message);
+    }
+    setLocationLoading(false);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -83,6 +107,31 @@ export default function Home() {
             Start with My Niyyah
           </button>
         </div>
+
+        {locationLoaded && !location && (
+          <div className="card animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <div className="card-body text-center">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: 'rgba(200,169,110,0.15)' }}>
+                <MapPin size={20} style={{ color: 'var(--accent)' }} />
+              </div>
+              <p className="text-sm font-bold mb-1" style={{ color: 'var(--primary)' }}>Auto-fill Prayer Times</p>
+              <p className="text-xs text-[var(--muted)] leading-relaxed mb-3">
+                Enable location to automatically fill Fajr and Maghrib times on your daily pages.
+              </p>
+              <button
+                onClick={handleEnableLocation}
+                disabled={locationLoading}
+                className="w-full py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                style={{ background: 'var(--accent)' }}
+              >
+                {locationLoading ? 'Getting location...' : 'Enable Prayer Times'}
+              </button>
+              <p className="text-[0.6rem] text-[var(--muted)] mt-2 leading-relaxed">
+                Prayer times are based on your general location and may not be completely accurate. Please verify with your local masjid.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       <Footer />
     </div>
