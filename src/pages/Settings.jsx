@@ -1,0 +1,188 @@
+import { useState } from 'react';
+import { getSetting, setSetting, exportAllData, importAllData, clearAllData } from '../lib/db';
+import SavedToast from '../components/SavedToast';
+import Footer from '../components/Footer';
+import { Download, Upload, Trash2, Info, Smartphone } from 'lucide-react';
+
+const THEMES = [
+  { id: 'forest', name: 'Forest', primary: '#1B4332', secondary: '#2D6A4F', bg: '#FAF8F3' },
+  { id: 'rose', name: 'Rose', primary: '#5C2340', secondary: '#8B3A62', bg: '#FDF6F9' },
+  { id: 'midnight', name: 'Midnight', primary: '#1A2332', secondary: '#2E4A6E', bg: '#F4F6F9' },
+];
+
+export default function Settings({ theme, onThemeChange }) {
+  const [showSaved, setShowSaved] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  const changeTheme = async (id) => {
+    await setSetting('theme', id);
+    onThemeChange(id);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 1300);
+  };
+
+  const handleExport = async () => {
+    const data = await exportAllData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ramadan-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      try {
+        const data = JSON.parse(text);
+        await importAllData(data);
+        const themeSetting = data.settings?.find(s => s.key === 'theme');
+        if (themeSetting) onThemeChange(themeSetting.value);
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1300);
+        window.location.reload();
+      } catch {
+        alert('Invalid backup file. Please select a valid JSON export.');
+      }
+    };
+    input.click();
+  };
+
+  const handleReset = async () => {
+    await clearAllData();
+    onThemeChange('forest');
+    setShowResetConfirm(false);
+    window.location.reload();
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div className="geo-pattern rounded-b-3xl px-5 py-8 text-center text-white" style={{ background: 'var(--primary)' }}>
+        <p className="spaced-caps text-[var(--accent)] mb-1">Personalise</p>
+        <h1 className="text-2xl font-extrabold">Settings</h1>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+        {/* Theme selector */}
+        <div className="card animate-fade-in-up">
+          <div className="section-bar section-bar-primary">
+            <span>✸</span> <span>THEME</span>
+          </div>
+          <div className="card-body">
+            <div className="grid grid-cols-3 gap-3">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => changeTheme(t.id)}
+                  className="rounded-xl p-3 text-center transition-all hover:scale-[1.03]"
+                  style={{
+                    border: theme === t.id ? `3px solid ${t.primary}` : '2px solid #E2E8F0',
+                    background: t.bg,
+                  }}
+                >
+                  <div className="flex gap-1 justify-center mb-2">
+                    <div className="w-4 h-4 rounded-full" style={{ background: t.primary }} />
+                    <div className="w-4 h-4 rounded-full" style={{ background: t.secondary }} />
+                    <div className="w-4 h-4 rounded-full" style={{ background: '#C8A96E' }} />
+                  </div>
+                  <span className="text-xs font-bold" style={{ color: t.primary }}>{t.name}</span>
+                  {theme === t.id && <p className="text-[0.6rem] text-[var(--accent)] font-bold mt-1">Active</p>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Data Management */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="section-bar section-bar-primary">
+            <span>●</span> <span>DATA</span>
+          </div>
+          <div className="card-body space-y-3">
+            <button onClick={handleExport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+              <Download size={18} style={{ color: 'var(--primary)' }} />
+              <div className="text-left">
+                <span className="text-sm font-bold block">Export Data</span>
+                <span className="text-xs text-[var(--muted)]">Download all your data as a JSON file</span>
+              </div>
+            </button>
+            <button onClick={handleImport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+              <Upload size={18} style={{ color: 'var(--primary)' }} />
+              <div className="text-left">
+                <span className="text-sm font-bold block">Import Data</span>
+                <span className="text-xs text-[var(--muted)]">Restore from a previously exported JSON file</span>
+              </div>
+            </button>
+            <button onClick={() => setShowResetConfirm(true)} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-red-50" style={{ border: '1.5px solid #FCA5A5' }}>
+              <Trash2 size={18} className="text-red-500" />
+              <div className="text-left">
+                <span className="text-sm font-bold block text-red-600">Reset All Data</span>
+                <span className="text-xs text-[var(--muted)]">Clear all entries and start fresh</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Install PWA */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+          <div className="section-bar section-bar-gold">
+            <Smartphone size={16} /> <span>INSTALL APP</span>
+          </div>
+          <div className="card-body">
+            <p className="text-sm text-[var(--muted)] leading-relaxed">
+              <strong>iPhone/iPad:</strong> Tap the Share button in Safari, then "Add to Home Screen."
+            </p>
+            <p className="text-sm text-[var(--muted)] leading-relaxed mt-2">
+              <strong>Android:</strong> Tap the menu (⋮) in Chrome, then "Install app" or "Add to Home screen."
+            </p>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="section-bar section-bar-dark">
+            <Info size={16} /> <span>ABOUT</span>
+          </div>
+          <div className="card-body text-center">
+            <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>The Ramadan Reset Planner</p>
+            <p className="text-xs text-[var(--muted)] mt-1">by GuidedBarakah</p>
+            <p className="text-xs text-[var(--muted)] mt-1">www.guidedbarakah.com</p>
+            <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
+            <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
+              All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Reset confirmation modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-red-600 mb-2">Reset All Data?</h3>
+            <p className="text-sm text-[var(--muted)] mb-4">Are you sure? This will delete all your entries, goals, reflections, and tracker data. This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowResetConfirm(false)} className="flex-1 py-2.5 rounded-lg text-sm font-bold" style={{ border: '1.5px solid #E2E8F0' }}>
+                Cancel
+              </button>
+              <button onClick={handleReset} className="flex-1 py-2.5 rounded-lg text-sm font-bold text-white bg-red-500">
+                Delete Everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SavedToast show={showSaved} />
+      <Footer />
+    </div>
+  );
+}
