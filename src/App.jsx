@@ -26,6 +26,18 @@ const SettingsPage = lazy(() => import('./pages/Settings'));
  */
 const SECRET_KEY = 'barakah2026ramadan';
 
+// Master keys for owner/partner access (SHA-256 hashes)
+const MASTER_HASHES = [
+  '76ffbe2730348eec0ba3aacabdd2b14158f443a5468cf376d0ddd35e332b9210',
+  'b76b0a1d0976807bc1fe02870a5f8acad8374559beae9c4a5d3c25478026a54d',
+];
+
+async function hashString(str) {
+  const data = new TextEncoder().encode(str);
+  const buffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 function validateCode(code) {
   const cleaned = code.trim().toUpperCase().replace(/\s+/g, '');
   // Accept format GB-XXXX-XXXX or GBXXXXXXXX
@@ -49,6 +61,11 @@ function validateCode(code) {
   return check === c1 + c2;
 }
 
+async function isMasterKey(code) {
+  const hash = await hashString(code.trim());
+  return MASTER_HASHES.includes(hash);
+}
+
 function UnlockScreen({ onUnlock }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -59,9 +76,10 @@ function UnlockScreen({ onUnlock }) {
     setChecking(true);
     setError('');
 
-    if (validateCode(code)) {
+    const master = await isMasterKey(code);
+    if (master || validateCode(code)) {
       await setSetting('unlocked', true);
-      await setSetting('unlockCode', code.trim().toUpperCase());
+      await setSetting('unlockCode', master ? 'MASTER' : code.trim().toUpperCase());
       onUnlock();
     } else {
       setError('Invalid code. Please check your order confirmation email.');
