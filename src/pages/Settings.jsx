@@ -128,7 +128,7 @@ export default function Settings({ theme, onThemeChange }) {
 
   return (
     <div className="animate-fade-in">
-      <div className="geo-pattern rounded-b-3xl px-5 py-8 text-center text-white" style={{ background: 'var(--primary)' }}>
+      <div className="geo-pattern rounded-b-3xl px-5 pb-8 text-center text-white" style={{ background: 'var(--primary)', paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))' }}>
         <p className="spaced-caps text-[var(--accent)] mb-1">Personalise</p>
         <h1 className="text-2xl font-extrabold">Settings</h1>
       </div>
