@@ -18,7 +18,7 @@ export default function QuranTracker() {
 
   return (
     <div className="animate-fade-in">
-      <div className="geo-pattern rounded-b-3xl px-5 py-8 text-center text-white" style={{ background: 'var(--primary)' }}>
+      <div className="geo-pattern rounded-b-3xl px-5 py-9 text-center text-white" style={{ background: 'var(--primary)' }}>
         <p className="spaced-caps text-[var(--accent)] mb-1">Quran Tracker</p>
         <h1 className="text-2xl font-extrabold">Khatm Completion Plan</h1>
       </div>
