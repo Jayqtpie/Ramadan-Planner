@@ -96,6 +96,16 @@ export default function DailyPage() {
     <div className="animate-fade-in" key={day}>
       {/* Header */}
       <div className="geo-pattern rounded-b-3xl px-5 py-6 text-white" style={{ background: 'var(--primary)' }}>
+        <div className="flex justify-end max-w-2xl mx-auto mb-1">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.65rem] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all"
+            aria-label="Share this day"
+          >
+            <Share2 size={13} />
+            <span>Share</span>
+          </button>
+        </div>
         <div className="flex items-center justify-between max-w-2xl mx-auto">
           <button
             onClick={() => day > 1 && navigate(`/daily/${day - 1}`)}
@@ -143,14 +153,6 @@ export default function DailyPage() {
             className="flex-1 text-xs !bg-white/10 !border-white/20 !text-white placeholder:text-white/40"
           />
         </div>
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1.5 mx-auto mt-3 px-3 py-1.5 rounded-full text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all"
-          aria-label="Share this day"
-        >
-          <Share2 size={14} />
-          <span>Share Day {day}</span>
-        </button>
       </div>
 
       {/* Day selector strip */}

@@ -288,7 +288,7 @@ export async function generatePdf() {
 
   // Daily summary table
   if (tableBody.length > 0) {
-    autoTable(doc, {
+    const table = autoTable(doc, {
       startY: y,
       head: [['Day', 'Salah', 'On Time', 'Khushu\'', 'Quran Pg', 'Deeds', 'Water']],
       body: tableBody,
@@ -311,7 +311,7 @@ export async function generatePdf() {
         0: { halign: 'left', fontStyle: 'bold' },
       },
     });
-    y = doc.lastAutoTable.finalY + 8;
+    y = (table?.finalY ?? doc.lastAutoTable?.finalY ?? y) + 8;
   }
 
   // ========== DETAILED DAILY ENTRIES ==========
