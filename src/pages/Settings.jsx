@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { getSetting, setSetting, exportAllData, importAllData, clearAllData } from '../lib/db';
+import { generatePdf } from '../lib/exportPdf';
+import { shareProgress } from '../lib/shareProgress';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { Download, Upload, Trash2, Info, Smartphone } from 'lucide-react';
+import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload } from 'lucide-react';
 
 const THEMES = [
   { id: 'forest', name: 'Forest', primary: '#1B4332', secondary: '#2D6A4F', bg: '#FAF8F3' },
@@ -22,7 +24,37 @@ export default function Settings({ theme, onThemeChange }) {
     setTimeout(() => setShowSaved(false), 1300);
   };
 
-  const handleExport = async () => {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      await generatePdf();
+    } catch (err) {
+      alert('Something went wrong generating your PDF. Please try again.');
+      console.error(err);
+    }
+    setExporting(false);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    try {
+      const result = await shareProgress();
+      if (result === 'copied') {
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1300);
+      }
+    } catch (err) {
+      alert('Something went wrong. Please try again.');
+      console.error(err);
+    }
+  };
+
+  const handleBackup = async () => {
     const data = await exportAllData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -101,24 +133,55 @@ export default function Settings({ theme, onThemeChange }) {
           </div>
         </div>
 
-        {/* Data Management */}
+        {/* Export & Share */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <div className="section-bar section-bar-primary">
-            <span>●</span> <span>DATA</span>
+            <span>●</span> <span>EXPORT & SHARE</span>
           </div>
           <div className="card-body space-y-3">
-            <button onClick={handleExport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
-              <Download size={18} style={{ color: 'var(--primary)' }} />
+            <button onClick={handleExportPdf} disabled={exporting} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 disabled:opacity-60" style={{ border: '1.5px solid #E2E8F0' }}>
+              <FileText size={18} style={{ color: 'var(--primary)' }} />
+              <div className="text-left flex-1">
+                <span className="text-sm font-bold block">Download PDF</span>
+                <span className="text-xs text-[var(--muted)]">Save your entire Ramadan journey as a beautiful PDF</span>
+              </div>
+              {exporting && <span className="text-xs text-[var(--muted)] animate-pulse">Creating...</span>}
+            </button>
+            <button onClick={handlePrint} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+              <Printer size={18} style={{ color: 'var(--primary)' }} />
               <div className="text-left">
-                <span className="text-sm font-bold block">Export Data</span>
-                <span className="text-xs text-[var(--muted)]">Download all your data as a JSON file</span>
+                <span className="text-sm font-bold block">Print This Page</span>
+                <span className="text-xs text-[var(--muted)]">Print or save as PDF using your browser</span>
+              </div>
+            </button>
+            <button onClick={handleShare} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+              <Share2 size={18} style={{ color: 'var(--primary)' }} />
+              <div className="text-left">
+                <span className="text-sm font-bold block">Share Progress</span>
+                <span className="text-xs text-[var(--muted)]">Share a summary via WhatsApp, iMessage, or other apps</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Data Management */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+          <div className="section-bar section-bar-dark">
+            <span>●</span> <span>DATA MANAGEMENT</span>
+          </div>
+          <div className="card-body space-y-3">
+            <button onClick={handleBackup} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+              <HardDriveDownload size={18} style={{ color: 'var(--primary)' }} />
+              <div className="text-left">
+                <span className="text-sm font-bold block">Backup Data</span>
+                <span className="text-xs text-[var(--muted)]">Download a backup file to restore later</span>
               </div>
             </button>
             <button onClick={handleImport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
               <Upload size={18} style={{ color: 'var(--primary)' }} />
               <div className="text-left">
-                <span className="text-sm font-bold block">Import Data</span>
-                <span className="text-xs text-[var(--muted)]">Restore from a previously exported JSON file</span>
+                <span className="text-sm font-bold block">Restore Backup</span>
+                <span className="text-xs text-[var(--muted)]">Restore from a previously downloaded backup</span>
               </div>
             </button>
             <button onClick={() => setShowResetConfirm(true)} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-red-50" style={{ border: '1.5px solid #FCA5A5' }}>
@@ -132,7 +195,7 @@ export default function Settings({ theme, onThemeChange }) {
         </div>
 
         {/* Install PWA */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <div className="section-bar section-bar-gold">
             <Smartphone size={16} /> <span>INSTALL APP</span>
           </div>
@@ -147,7 +210,7 @@ export default function Settings({ theme, onThemeChange }) {
         </div>
 
         {/* About */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
           <div className="section-bar section-bar-dark">
             <Info size={16} /> <span>ABOUT</span>
           </div>
