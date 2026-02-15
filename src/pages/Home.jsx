@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <div className="animate-fade-in">
       {/* Hero */}
-      <div className="geo-pattern rounded-b-3xl px-5 py-10 text-center text-white" style={{ background: 'var(--primary)', paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))' }}>
+      <div className="geo-pattern rounded-b-3xl px-5 py-10 text-center text-white" style={{ background: 'var(--primary)' }}>
         <p className="spaced-caps text-[var(--accent)] mb-2">The Ramadan Reset Planner</p>
         <h1 className="text-3xl font-extrabold mb-1">Welcome</h1>
         <p className="text-white/70 text-sm">by GuidedBarakah</p>
