@@ -329,9 +329,9 @@ export default function DailyPage() {
                     <span className="text-[var(--accent)]">☾</span>
                     <span className="text-[0.65rem] font-bold text-[var(--accent)] uppercase tracking-wider">Dua for Breaking Fast</span>
                   </div>
-                  <p className="text-sm italic leading-relaxed text-[var(--body)]">"Allahumma inni laka sumtu, wa bika aamantu, wa 'ala rizqika aftartu."</p>
-                  <p className="text-xs text-[var(--muted)] mt-1.5">O Allah, I fasted for You, I believed in You, and I break my fast with Your provision.</p>
-                  <p className="text-[0.6rem] text-[var(--muted)] mt-1">— Abu Dawud, 2358</p>
+                  <p className="text-sm italic leading-relaxed text-[var(--body)]">"Dhahaba al-zama'u wabtallati al-'uruqu wa thabata al-ajru in shaa Allah."</p>
+                  <p className="text-xs text-[var(--muted)] mt-1.5">Thirst is gone, the veins are moistened, and the reward is certain if Allah wills.</p>
+                  <p className="text-[0.6rem] text-[var(--muted)] mt-1">— Abu Dawud, 2357</p>
                 </div>
                 <div>
                   <span className="text-sm font-medium mb-1 block">Water Intake</span>
