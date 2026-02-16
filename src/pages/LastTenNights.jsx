@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { getAllData } from '../lib/db';
 import { getDefaultLastTenNight, LAST_TEN_DUAS } from '../lib/data';
 import SectionBar from '../components/SectionBar';
 import SavedToast from '../components/SavedToast';
@@ -17,6 +18,16 @@ const WORSHIP_ITEMS = [
   { key: 'istighfar100', label: 'Made istighfar (100+ times)' },
   { key: 'surahAlQadr', label: 'Recited Surah Al-Qadr' },
 ];
+
+function hasNightContent(nightData) {
+  if (!nightData) return false;
+  const wc = nightData.worshipChecklist || {};
+  const anyChecked = Object.entries(wc).some(([k, v]) => k !== 'quranJuz' && v === true);
+  if (anyChecked) return true;
+  if (nightData.personalDuas && nightData.personalDuas.trim()) return true;
+  if (nightData.reflection && nightData.reflection.trim()) return true;
+  return false;
+}
 
 function NightCard({ night }) {
   const isOdd = night % 2 === 1;
@@ -103,7 +114,20 @@ function NightCard({ night }) {
 
 export default function LastTenNights() {
   const navigate = useNavigate();
-  const [selectedNight, setSelectedNight] = useState(null);
+  const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const tonightNight = today >= 21 && today <= 30 ? today : null;
+  const [selectedNight, setSelectedNight] = useState(tonightNight);
+  const [trackedNights, setTrackedNights] = useState({});
+
+  useEffect(() => {
+    getAllData('lastTenNights').then((nights) => {
+      const tracked = {};
+      (nights || []).forEach((n) => {
+        if (hasNightContent(n)) tracked[n.id] = true;
+      });
+      setTrackedNights(tracked);
+    });
+  }, []);
 
   return (
     <div className="animate-fade-in">
@@ -121,9 +145,26 @@ export default function LastTenNights() {
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         <div className="hadith-block">
           <p className="text-sm leading-relaxed italic">
-            "The Prophet ﷺ used to strive more in worship during the last ten days of Ramadan than at any other time."
+            "The Prophet (peace be upon him) used to strive more in worship during the last ten days of Ramadan than at any other time."
           </p>
           <p className="text-xs text-[var(--muted)] mt-2 not-italic">— Sahih Muslim</p>
+        </div>
+
+        {/* Laylatul Qadr dua — always visible */}
+        <div
+          className="rounded-xl p-4 text-center"
+          style={{ background: 'rgba(200,169,110,0.12)', border: '1.5px solid var(--accent)' }}
+        >
+          <p className="text-[0.65rem] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>
+            The Dua for Laylatul Qadr
+          </p>
+          <p className="text-sm font-medium italic" style={{ color: 'var(--primary)' }}>
+            "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni"
+          </p>
+          <p className="text-xs text-[var(--muted)] mt-1.5">
+            Oh Allah, You are the most forgiving and You love forgiveness; so forgive me.
+          </p>
+          <p className="text-[0.6rem] text-[var(--muted)] mt-1.5 not-italic">— Tirmidhi</p>
         </div>
 
         <div className="text-center text-sm text-[var(--muted)] leading-relaxed">
@@ -136,11 +177,13 @@ export default function LastTenNights() {
         <div className="flex flex-wrap gap-2 justify-center">
           {Array.from({ length: 10 }, (_, i) => i + 21).map((n) => {
             const isOdd = n % 2 === 1;
+            const isTracked = trackedNights[`night-${n}`];
+            const isTonight = n === tonightNight;
             return (
               <button
                 key={n}
                 onClick={() => setSelectedNight(selectedNight === n ? null : n)}
-                className="px-3 py-2 rounded-lg text-sm font-bold transition-all"
+                className="px-3 py-2 rounded-lg text-sm font-bold transition-all relative"
                 style={{
                   background: selectedNight === n ? 'var(--primary)' : isOdd ? 'rgba(200,169,110,0.15)' : 'var(--card)',
                   color: selectedNight === n ? '#fff' : 'var(--body)',
@@ -148,7 +191,20 @@ export default function LastTenNights() {
                 }}
               >
                 {n}
-                {isOdd && <span className="text-[0.6rem] block text-[var(--accent)]">odd</span>}
+                {isOdd && selectedNight !== n && <span className="text-[0.6rem] block text-[var(--accent)]">odd</span>}
+                {isOdd && selectedNight === n && <span className="text-[0.6rem] block text-[var(--accent)]">odd</span>}
+                {isTracked && (
+                  <div
+                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
+                    style={{ background: 'var(--accent)' }}
+                  />
+                )}
+                {isTonight && !isTracked && (
+                  <div
+                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
+                    style={{ background: 'var(--primary)', border: '1px solid white' }}
+                  />
+                )}
               </button>
             );
           })}
@@ -161,7 +217,7 @@ export default function LastTenNights() {
           </div>
         )}
 
-        {/* If none selected, show all */}
+        {/* If none selected */}
         {!selectedNight && (
           <p className="text-center text-xs text-[var(--muted)]">Select a night above to track your worship.</p>
         )}

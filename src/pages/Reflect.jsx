@@ -1,16 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAllData } from '../lib/db';
 import Footer from '../components/Footer';
-
-const SECTIONS = [
-  { id: 'weekly', label: 'Weekly Reflections', sub: '4 Jumu\'ah Reviews', icon: '✸' },
-  { id: 'last10', label: 'Last 10 Nights', sub: 'Nights 21-30', icon: '☾' },
-  { id: 'eid', label: 'Eid Mubarak', sub: 'Preparation & Checklist', icon: '✸' },
-  { id: 'post', label: 'Post-Ramadan', sub: 'Keep the Momentum', icon: '●' },
-];
 
 export default function Reflect() {
   const navigate = useNavigate();
+  const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const currentWeek = Math.min(4, Math.ceil(today / 7));
+  const [weeksDone, setWeeksDone] = useState({});
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    getAllData('weeklyReflections').then((reflections) => {
+      const done = {};
+      (reflections || []).forEach((r) => {
+        const hasContent =
+          (r.wentWell && r.wentWell.trim()) ||
+          (r.needsImprovement && r.needsImprovement.trim()) ||
+          (r.spiritualHighlight && r.spiritualHighlight.trim()) ||
+          r.weekRating > 0;
+        if (hasContent) done[r.id] = true;
+      });
+      setWeeksDone(done);
+      setDataLoaded(true);
+    });
+  }, []);
+
+  const nightsRemaining = today < 21 ? 30 - today : Math.max(0, 30 - today);
+  const daysUntilLast10 = Math.max(0, 20 - today);
+  const inLast10 = today >= 21;
 
   return (
     <div className="animate-fade-in">
@@ -20,25 +38,63 @@ export default function Reflect() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        {/* Last 10 Nights countdown/urgency banner */}
+        {inLast10 ? (
+          <div
+            className="rounded-xl p-4 text-center animate-fade-in-up"
+            style={{ background: 'rgba(200,169,110,0.12)', border: '1.5px solid var(--accent)' }}
+          >
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
+              ☾ The Last 10 Nights have begun
+            </p>
+            <p className="text-sm font-bold mt-1" style={{ color: 'var(--primary)' }}>
+              {nightsRemaining > 0 ? `${nightsRemaining} night${nightsRemaining === 1 ? '' : 's'} remaining` : 'Tonight is the last night'}
+            </p>
+          </div>
+        ) : (
+          <div
+            className="rounded-xl p-3 text-center animate-fade-in-up"
+            style={{ background: 'var(--card)', border: '1.5px solid #E2E8F0' }}
+          >
+            <p className="text-xs text-[var(--muted)]">
+              <span style={{ color: 'var(--accent)' }}>☾</span> {daysUntilLast10} day{daysUntilLast10 === 1 ? '' : 's'} until the Last 10 Nights
+            </p>
+          </div>
+        )}
+
         {/* Weekly reflection links */}
-        <div className="card animate-fade-in-up">
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
           <div className="section-bar section-bar-primary">
             <span>✸</span> <span>WEEKLY REFLECTIONS</span>
           </div>
           <div className="card-body grid grid-cols-2 gap-3">
-            {[1, 2, 3, 4].map((w) => (
-              <button
-                key={w}
-                onClick={() => navigate(`/reflect/week/${w}`)}
-                className="p-3 rounded-xl text-left transition-all hover:scale-[1.02]"
-                style={{ border: '1.5px solid #E2E8F0' }}
-              >
-                <div className="text-sm font-bold">Week {w}</div>
-                <div className="text-xs text-[var(--muted)]">
-                  Days {w === 4 ? '22-30' : `${(w - 1) * 7 + 1}-${w * 7}`}
-                </div>
-              </button>
-            ))}
+            {[1, 2, 3, 4].map((w) => {
+              const isCurrent = w === currentWeek;
+              const isDone = weeksDone[`week-${w}`];
+              return (
+                <button
+                  key={w}
+                  onClick={() => navigate(`/reflect/week/${w}`)}
+                  className="p-3 rounded-xl text-left transition-all hover:scale-[1.02] relative"
+                  style={{
+                    border: isCurrent ? '2px solid var(--accent)' : '1.5px solid #E2E8F0',
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-bold">Week {w}</div>
+                    {isDone && (
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
+                    )}
+                  </div>
+                  <div className="text-xs text-[var(--muted)]">
+                    Days {w === 4 ? '22-30' : `${(w - 1) * 7 + 1}-${w * 7}`}
+                  </div>
+                  {isCurrent && (
+                    <span className="text-[0.6rem] font-bold" style={{ color: 'var(--accent)' }}>This week</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

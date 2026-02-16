@@ -4,7 +4,7 @@ import { shareProgress } from '../lib/shareProgress';
 import { getLocation, setupLocation, clearLocation } from '../lib/prayerTimes';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin } from 'lucide-react';
+import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check } from 'lucide-react';
 
 const THEMES = [
   { id: 'forest', name: 'Forest', primary: '#1B4332', secondary: '#2D6A4F', bg: '#FAF8F3' },
@@ -19,11 +19,19 @@ export default function Settings({ theme, onThemeChange }) {
   const [location, setLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationLoaded, setLocationLoaded] = useState(false);
+  const [lastBackupDate, setLastBackupDate] = useState(null);
+  const [isStandalone] = useState(() =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
 
   useEffect(() => {
     getLocation().then((loc) => {
       if (loc) setLocation(loc);
       setLocationLoaded(true);
+    });
+    getSetting('lastBackupDate').then((d) => {
+      if (d) setLastBackupDate(d);
     });
   }, []);
 
@@ -94,6 +102,9 @@ export default function Settings({ theme, onThemeChange }) {
     a.download = `ramadan-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    const now = new Date().toISOString();
+    await setSetting('lastBackupDate', now);
+    setLastBackupDate(now);
   };
 
   const handleImport = () => {
@@ -124,6 +135,11 @@ export default function Settings({ theme, onThemeChange }) {
     onThemeChange('forest');
     setShowResetConfirm(false);
     window.location.reload();
+  };
+
+  const formatBackupDate = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
@@ -164,8 +180,34 @@ export default function Settings({ theme, onThemeChange }) {
           </div>
         </div>
 
-        {/* Prayer Times Location */}
+        {/* Install PWA */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+          <div className="section-bar section-bar-gold">
+            <Smartphone size={16} /> <span>INSTALL APP</span>
+          </div>
+          <div className="card-body">
+            {isStandalone ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(200,169,110,0.15)' }}>
+                  <Check size={16} style={{ color: 'var(--accent)' }} />
+                </div>
+                <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>App installed</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">
+                  <strong>iPhone/iPad:</strong> Tap the Share button in Safari, then "Add to Home Screen."
+                </p>
+                <p className="text-sm text-[var(--muted)] leading-relaxed mt-2">
+                  <strong>Android:</strong> Tap the menu (⋮) in Chrome, then "Install app" or "Add to Home screen."
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Prayer Times Location */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <div className="section-bar section-bar-gold">
             <MapPin size={16} /> <span>PRAYER TIMES</span>
           </div>
@@ -212,7 +254,7 @@ export default function Settings({ theme, onThemeChange }) {
         </div>
 
         {/* Export & Share */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <div className="section-bar section-bar-primary">
             <span>●</span> <span>EXPORT & SHARE</span>
           </div>
@@ -243,7 +285,7 @@ export default function Settings({ theme, onThemeChange }) {
         </div>
 
         {/* Data Management */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <div className="section-bar section-bar-dark">
             <span>●</span> <span>DATA MANAGEMENT</span>
           </div>
@@ -262,6 +304,11 @@ export default function Settings({ theme, onThemeChange }) {
                 <span className="text-xs text-[var(--muted)]">Restore from a previously downloaded backup</span>
               </div>
             </button>
+            <p className="text-[0.65rem] text-[var(--muted)] text-center">
+              {lastBackupDate
+                ? `Last backup: ${formatBackupDate(lastBackupDate)}`
+                : 'No backups yet — your data only lives on this device'}
+            </p>
             <button onClick={() => setShowResetConfirm(true)} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-red-50" style={{ border: '1.5px solid #FCA5A5' }}>
               <Trash2 size={18} className="text-red-500" />
               <div className="text-left">
@@ -269,21 +316,6 @@ export default function Settings({ theme, onThemeChange }) {
                 <span className="text-xs text-[var(--muted)]">Clear all entries and start fresh</span>
               </div>
             </button>
-          </div>
-        </div>
-
-        {/* Install PWA */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="section-bar section-bar-gold">
-            <Smartphone size={16} /> <span>INSTALL APP</span>
-          </div>
-          <div className="card-body">
-            <p className="text-sm text-[var(--muted)] leading-relaxed">
-              <strong>iPhone/iPad:</strong> Tap the Share button in Safari, then "Add to Home Screen."
-            </p>
-            <p className="text-sm text-[var(--muted)] leading-relaxed mt-2">
-              <strong>Android:</strong> Tap the menu (⋮) in Chrome, then "Install app" or "Add to Home screen."
-            </p>
           </div>
         </div>
 
@@ -299,6 +331,9 @@ export default function Settings({ theme, onThemeChange }) {
             <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
             <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
               All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
+            </p>
+            <p className="text-xs text-[var(--muted)] mt-2">
+              Need help? <a href="mailto:jay@guidedbarakah.com" className="underline" style={{ color: 'var(--accent)' }}>jay@guidedbarakah.com</a>
             </p>
           </div>
         </div>
