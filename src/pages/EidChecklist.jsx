@@ -5,9 +5,12 @@ import SectionBar from '../components/SectionBar';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
 import { ChevronLeft } from 'lucide-react';
+import { useRamadanDay } from '../hooks/useRamadanDay';
 
 export default function EidChecklist() {
   const navigate = useNavigate();
+  const { today } = useRamadanDay();
+  const daysUntilEid = Math.max(0, 30 - today);
   const { data, update, loaded, showSaved } = useAutoSave('eidChecklist', 'eid', getDefaultEidChecklist);
 
   if (!loaded || !data) return <div className="p-8 text-center text-[var(--muted)]">Loading...</div>;
@@ -31,6 +34,29 @@ export default function EidChecklist() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+        {/* Eid countdown */}
+        {daysUntilEid > 0 && (
+          <div
+            className="rounded-xl p-3 text-center animate-fade-in-up"
+            style={{ background: 'rgba(200,169,110,0.12)', border: '1.5px solid var(--accent)' }}
+          >
+            <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>
+              {daysUntilEid} day{daysUntilEid === 1 ? '' : 's'} until Eid
+            </p>
+            <p className="text-xs text-[var(--muted)] mt-0.5">Start preparing early!</p>
+          </div>
+        )}
+        {daysUntilEid === 0 && (
+          <div
+            className="rounded-xl p-4 text-center animate-fade-in-up"
+            style={{ background: 'rgba(200,169,110,0.12)', border: '1.5px solid var(--accent)' }}
+          >
+            <p className="text-sm font-bold" style={{ color: 'var(--accent)' }}>
+              ✸ Eid Mubarak! ✸
+            </p>
+          </div>
+        )}
+
         {/* Before Eid */}
         <div className="card animate-fade-in-up">
           <SectionBar variant="gold" icon="✸">BEFORE EID DAY</SectionBar>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { getAllData } from '../lib/db';
+import { useRamadanDay } from '../hooks/useRamadanDay';
 import { getDefaultLastTenNight, LAST_TEN_DUAS } from '../lib/data';
 import SectionBar from '../components/SectionBar';
 import SavedToast from '../components/SavedToast';
@@ -114,7 +115,7 @@ function NightCard({ night }) {
 
 export default function LastTenNights() {
   const navigate = useNavigate();
-  const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const { today } = useRamadanDay();
   const tonightNight = today >= 21 && today <= 30 ? today : null;
   const [selectedNight, setSelectedNight] = useState(tonightNight);
   const [trackedNights, setTrackedNights] = useState({});

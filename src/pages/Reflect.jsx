@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllData } from '../lib/db';
+import { useRamadanDay } from '../hooks/useRamadanDay';
 import Footer from '../components/Footer';
 
 export default function Reflect() {
   const navigate = useNavigate();
-  const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const { today } = useRamadanDay();
   const currentWeek = Math.min(4, Math.ceil(today / 7));
   const [weeksDone, setWeeksDone] = useState({});
   const [dataLoaded, setDataLoaded] = useState(false);

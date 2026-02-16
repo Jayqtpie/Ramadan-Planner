@@ -37,6 +37,21 @@ export default function QuranTracker() {
           <div className="progress-bar">
             <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
           </div>
+          {completed >= 30 && (
+            <p className="text-sm font-bold text-center mt-3" style={{ color: 'var(--accent)' }}>
+              Allahu Akbar — Khatm complete! May Allah accept it from you.
+            </p>
+          )}
+          {completed >= 20 && completed < 30 && (
+            <p className="text-xs text-center mt-3" style={{ color: 'var(--accent)' }}>
+              Two-thirds complete — the finish line is near!
+            </p>
+          )}
+          {completed >= 10 && completed < 20 && (
+            <p className="text-xs text-center mt-3" style={{ color: 'var(--accent)' }}>
+              One-third complete — keep going, you're building momentum!
+            </p>
+          )}
         </div>
 
         {/* Grid */}

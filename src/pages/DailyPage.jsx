@@ -1,9 +1,10 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { getDefaultDailyPage, HADITHS, MUHASABAH } from '../lib/data';
 import { getPrayerTimesForDay } from '../lib/prayerTimes';
-import { getSetting, setSetting } from '../lib/db';
+import { getSetting, setSetting, getAllData } from '../lib/db';
+import { useRamadanDay } from '../hooks/useRamadanDay';
 import SectionBar from '../components/SectionBar';
 import StarRating from '../components/StarRating';
 import SavedToast from '../components/SavedToast';
@@ -29,13 +30,34 @@ const GOOD_DEEDS = [
   { key: 'custom', label: '' },
 ];
 
+function hasDayContent(page) {
+  if (!page) return false;
+  if (page.muhasabahResponse && page.muhasabahResponse.trim()) return true;
+  if (page.todaysNiyyah && page.todaysNiyyah.trim()) return true;
+  const salah = page.salahTracker || {};
+  if (Object.values(salah).some((s) => s?.done)) return true;
+  return false;
+}
+
 export default function DailyPage() {
   const { day: dayParam } = useParams();
   const day = Math.min(30, Math.max(1, parseInt(dayParam) || 1));
+  const { today } = useRamadanDay();
   const navigate = useNavigate();
   const { data, update, loaded, showSaved } = useAutoSave('dailyPages', `day-${day}`, () => getDefaultDailyPage(day));
 
   const [prayerTimes, setPrayerTimes] = useState(null);
+  const [filledDays, setFilledDays] = useState({});
+
+  useEffect(() => {
+    getAllData('dailyPages').then((pages) => {
+      const filled = {};
+      (pages || []).forEach((p) => {
+        if (hasDayContent(p)) filled[p.id] = true;
+      });
+      setFilledDays(filled);
+    });
+  }, []);
 
   useEffect(() => {
     if (!loaded || !data) return;
@@ -96,27 +118,29 @@ export default function DailyPage() {
     update({ ...data, [field]: arr });
   };
 
+  // Compute summary stats
+  const fardPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  const prayersDone = fardPrayers.filter((p) => data.salahTracker[p]?.done).length;
+  const prayersOnTime = fardPrayers.filter((p) => data.salahTracker[p]?.onTime === 'Y').length;
+  const extraPrayers = ['taraweeh', 'tahajjud'].filter((p) => data.salahTracker[p]?.done);
+  const quranPages = parseInt(data.quranProgress?.pages) || 0;
+  const deedsDone = Object.entries(data.goodDeeds || {}).filter(([, v]) => v === true).length;
+  const waterCount = data.mealPlanner?.waterIntake || 0;
+  const hasSummaryContent = prayersDone > 0 || quranPages > 0 || deedsDone > 0;
+
   const handleShare = async () => {
-    const salah = data.salahTracker || {};
-    const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-    const done = prayers.filter(p => salah[p]?.done).length;
-    const onTime = prayers.filter(p => salah[p]?.onTime === 'Y').length;
-    const extras = ['taraweeh', 'tahajjud'].filter(p => salah[p]?.done).map(p => p.charAt(0).toUpperCase() + p.slice(1));
-    const pages = parseInt(data.quranProgress?.pages) || 0;
-    const deeds = Object.entries(data.goodDeeds || {}).filter(([, v]) => v === true).length;
-    const water = data.mealPlanner?.waterIntake || 0;
     const gratitudes = (data.gratitude || []).filter(g => g);
 
     const lines = [
       `\u2728 Ramadan Day ${day} \u2728`,
       '',
-      `\uD83D\uDD4C Prayers: ${done}/5${onTime ? ` (${onTime} on time)` : ''}`,
+      `\uD83D\uDD4C Prayers: ${prayersDone}/5${prayersOnTime ? ` (${prayersOnTime} on time)` : ''}`,
     ];
-    if (extras.length) lines.push(`\uD83C\uDF19 ${extras.join(' + ')}`);
+    if (extraPrayers.length) lines.push(`\uD83C\uDF19 ${extraPrayers.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' + ')}`);
     if (data.khushuRating) lines.push(`\uD83D\uDE4F Khushu\': ${'⭐'.repeat(data.khushuRating)}`);
-    if (pages) lines.push(`\uD83D\uDCD6 Quran: ${pages} pages`);
-    if (deeds) lines.push(`\u2764\uFE0F Good deeds: ${deeds}`);
-    if (water) lines.push(`\uD83D\uDCA7 Water: ${water}/8 glasses`);
+    if (quranPages) lines.push(`\uD83D\uDCD6 Quran: ${quranPages} pages`);
+    if (deedsDone) lines.push(`\u2764\uFE0F Good deeds: ${deedsDone}`);
+    if (waterCount) lines.push(`\uD83D\uDCA7 Water: ${waterCount}/8 glasses`);
     if (gratitudes.length) lines.push(`\uD83E\uDD32 Grateful for: ${gratitudes.join(', ')}`);
     lines.push('', 'Tracked with The Ramadan Reset Planner by GuidedBarakah');
 
@@ -202,12 +226,12 @@ export default function DailyPage() {
       </div>
 
       {/* Day selector strip */}
-      <div className="overflow-x-auto py-3 px-2 flex gap-1.5 border-b border-gray-100">
+      <div className="overflow-x-auto py-3 px-2 flex gap-1.5 border-b border-gray-100 relative">
         {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
           <button
             key={d}
             onClick={() => navigate(`/daily/${d}`)}
-            className="flex-shrink-0 w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition-all"
+            className="flex-shrink-0 w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition-all relative"
             style={{
               background: d === day ? 'var(--primary)' : 'transparent',
               color: d === day ? '#fff' : 'var(--muted)',
@@ -215,9 +239,28 @@ export default function DailyPage() {
             }}
           >
             {d}
+            {filledDays[`day-${d}`] && d !== day && (
+              <div
+                className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                style={{ background: 'var(--accent)' }}
+              />
+            )}
           </button>
         ))}
       </div>
+
+      {/* Jump to today pill */}
+      {day !== today && (
+        <div className="flex justify-center py-2">
+          <button
+            onClick={() => navigate(`/daily/${today}`)}
+            className="px-3 py-1 rounded-full text-xs font-bold transition-all hover:scale-105"
+            style={{ background: 'rgba(200,169,110,0.15)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+          >
+            Jump to Today (Day {today})
+          </button>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Today's Niyyah */}
@@ -227,6 +270,9 @@ export default function DailyPage() {
           </div>
           <div className="card-body">
             <input type="text" value={data.todaysNiyyah} onChange={(e) => set('todaysNiyyah', e.target.value)} placeholder="What is your intention for today?" />
+            <Link to="/niyyah" className="text-[0.65rem] mt-1.5 block" style={{ color: 'var(--muted)' }}>
+              View my Ramadan Niyyah →
+            </Link>
           </div>
         </div>
 
@@ -430,6 +476,22 @@ export default function DailyPage() {
             <textarea rows={3} value={data.muhasabahResponse} onChange={(e) => set('muhasabahResponse', e.target.value)} placeholder="Your reflection..." />
           </div>
         </div>
+
+        {/* Day Summary */}
+        {hasSummaryContent && (
+          <div className="card" style={{ borderLeft: '3px solid var(--accent)' }}>
+            <div className="card-body">
+              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>Today's Summary</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
+                <span>{prayersDone}/5 prayers{prayersOnTime > 0 && <span className="text-xs text-[var(--muted)]"> ({prayersOnTime} on time)</span>}</span>
+                {extraPrayers.length > 0 && <span className="text-xs text-[var(--muted)]">+ {extraPrayers.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</span>}
+                {quranPages > 0 && <span>{quranPages} Quran page{quranPages !== 1 ? 's' : ''}</span>}
+                {deedsDone > 0 && <span>{deedsDone} good deed{deedsDone !== 1 ? 's' : ''}</span>}
+                {waterCount > 0 && <span>{waterCount}/8 water</span>}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <SavedToast show={showSaved} />

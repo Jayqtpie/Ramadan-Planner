@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { getDefaultGoals } from '../lib/data';
+import { getAllData } from '../lib/db';
 import SectionBar from '../components/SectionBar';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
@@ -21,6 +23,35 @@ const QURAN_OPTIONS = [
 
 export default function Goals() {
   const { data, update, loaded, showSaved } = useAutoSave('goals', 'goals', getDefaultGoals);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getAllData('dailyPages').then((pages) => {
+      if (!pages || pages.length === 0) return;
+      let totalPages = 0;
+      let sadaqahDays = 0;
+      let prayerDays = 0;
+      let daysLogged = 0;
+
+      pages.forEach((p) => {
+        const hasContent =
+          (p.muhasabahResponse && p.muhasabahResponse.trim()) ||
+          (p.todaysNiyyah && p.todaysNiyyah.trim()) ||
+          (p.salahTracker && Object.values(p.salahTracker).some((s) => s?.done));
+        if (!hasContent) return;
+        daysLogged++;
+        totalPages += parseInt(p.quranProgress?.pages) || 0;
+        if (p.goodDeeds?.sadaqah) sadaqahDays++;
+        const fard = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const allFard = fard.every((pr) => p.salahTracker?.[pr]?.done);
+        if (allFard) prayerDays++;
+      });
+
+      if (daysLogged > 0) {
+        setStats({ totalPages, sadaqahDays, prayerDays, daysLogged });
+      }
+    });
+  }, []);
 
   if (!loaded || !data) return <div className="p-8 text-center text-[var(--muted)]">Loading...</div>;
 
@@ -41,6 +72,36 @@ export default function Goals() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+        {/* Progress snapshot */}
+        {stats && (
+          <div
+            className="rounded-xl p-4 animate-fade-in-up"
+            style={{ background: 'rgba(200,169,110,0.1)', border: '1.5px solid var(--accent)' }}
+          >
+            <p className="text-[0.65rem] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>
+              Your Progress So Far
+            </p>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div>
+                <p className="text-lg font-extrabold" style={{ color: 'var(--primary)' }}>{stats.totalPages}</p>
+                <p className="text-[0.65rem] text-[var(--muted)]">Quran pages</p>
+              </div>
+              <div>
+                <p className="text-lg font-extrabold" style={{ color: 'var(--primary)' }}>{stats.sadaqahDays}</p>
+                <p className="text-[0.65rem] text-[var(--muted)]">Sadaqah days</p>
+              </div>
+              <div>
+                <p className="text-lg font-extrabold" style={{ color: 'var(--primary)' }}>{stats.prayerDays}</p>
+                <p className="text-[0.65rem] text-[var(--muted)]">All 5 prayers days</p>
+              </div>
+              <div>
+                <p className="text-lg font-extrabold" style={{ color: 'var(--primary)' }}>{stats.daysLogged}</p>
+                <p className="text-[0.65rem] text-[var(--muted)]">Days tracked</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 4 Quadrants */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {QUADRANTS.map((q, qi) => (

@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getLocation, setupLocation } from '../lib/prayerTimes';
 import { getData, getAllData } from '../lib/db';
+import { useRamadanDay } from '../hooks/useRamadanDay';
 import Footer from '../components/Footer';
 import logo from '../assets/logo.png';
 import { MapPin, ChevronDown } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
-  const today = Math.min(Math.max(1, new Date().getDate()), 30);
+  const { today } = useRamadanDay();
   const [location, setLocation] = useState(null);
   const [locationLoaded, setLocationLoaded] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
