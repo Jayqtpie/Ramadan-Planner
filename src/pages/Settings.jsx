@@ -6,6 +6,33 @@ import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
 import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check } from 'lucide-react';
 
+const PRAYER_METHODS = [
+  { id: '0', name: 'Shia Ithna-Ashari (Qum)' },
+  { id: '1', name: 'Univ. of Islamic Sciences, Karachi' },
+  { id: '2', name: 'ISNA (North America)' },
+  { id: '3', name: 'Muslim World League (MWL)' },
+  { id: '4', name: 'Umm Al-Qura, Makkah' },
+  { id: '5', name: 'Egyptian General Authority' },
+  { id: '7', name: 'Univ. of Tehran' },
+  { id: '8', name: 'Gulf Region' },
+  { id: '9', name: 'Kuwait' },
+  { id: '10', name: 'Qatar' },
+  { id: '11', name: 'Singapore' },
+  { id: '12', name: 'Union Islamique de France' },
+  { id: '13', name: 'Diyanet, Turkey' },
+  { id: '14', name: 'Russia' },
+  { id: '15', name: 'Moonsighting Committee Worldwide' },
+  { id: '16', name: 'Dubai' },
+  { id: '17', name: 'JAKIM, Malaysia' },
+  { id: '18', name: 'Tunisia' },
+  { id: '19', name: 'Algeria' },
+  { id: '20', name: 'Indonesia' },
+  { id: '21', name: 'Morocco' },
+  { id: '22', name: 'Comunidade Islamica de Lisboa' },
+  { id: '23', name: 'Jordan' },
+  { id: 'custom', name: 'Custom (enter times manually)' },
+];
+
 const THEMES = [
   { id: 'forest', name: 'Forest', primary: '#1B4332', secondary: '#2D6A4F', bg: '#FAF8F3' },
   { id: 'rose', name: 'Rose', primary: '#5C2340', secondary: '#8B3A62', bg: '#FDF6F9' },
@@ -19,6 +46,9 @@ export default function Settings({ theme, onThemeChange }) {
   const [location, setLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationLoaded, setLocationLoaded] = useState(false);
+  const [prayerMethod, setPrayerMethod] = useState('3');
+  const [customFajr, setCustomFajr] = useState('');
+  const [customMaghrib, setCustomMaghrib] = useState('');
   const [lastBackupDate, setLastBackupDate] = useState(null);
   const [isStandalone] = useState(() =>
     window.matchMedia('(display-mode: standalone)').matches ||
@@ -33,6 +63,9 @@ export default function Settings({ theme, onThemeChange }) {
     getSetting('lastBackupDate').then((d) => {
       if (d) setLastBackupDate(d);
     });
+    getSetting('prayerMethod').then((m) => { if (m) setPrayerMethod(m); });
+    getSetting('customFajr').then((v) => { if (v) setCustomFajr(v); });
+    getSetting('customMaghrib').then((v) => { if (v) setCustomMaghrib(v); });
   }, []);
 
   const handleEnableLocation = async () => {
@@ -225,6 +258,63 @@ export default function Settings({ theme, onThemeChange }) {
                     <p className="text-[0.65rem] text-[var(--muted)]">Fajr & Maghrib times will auto-fill on daily pages</p>
                   </div>
                 </div>
+
+                {/* Calculation method selector */}
+                <div className="mb-3">
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--primary)' }}>
+                    Calculation Method
+                  </label>
+                  <select
+                    value={prayerMethod}
+                    onChange={async (e) => {
+                      const val = e.target.value;
+                      setPrayerMethod(val);
+                      await setSetting('prayerMethod', val);
+                    }}
+                    className="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none"
+                    style={{ border: '1.5px solid #E2E8F0', background: 'white', color: 'var(--body)' }}
+                  >
+                    {PRAYER_METHODS.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-[0.6rem] text-[var(--muted)] mt-1 leading-relaxed">
+                    Auto-selected based on your location. Change if your masjid uses a different method.
+                  </p>
+                </div>
+
+                {/* Custom time inputs */}
+                {prayerMethod === 'custom' && (
+                  <div className="mb-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold mb-1" style={{ color: 'var(--primary)' }}>Fajr</label>
+                      <input
+                        type="time"
+                        value={customFajr}
+                        onChange={async (e) => {
+                          setCustomFajr(e.target.value);
+                          await setSetting('customFajr', e.target.value);
+                        }}
+                        className="w-full rounded-lg px-3 py-2 text-base border focus:outline-none"
+                        style={{ border: '1.5px solid #E2E8F0', background: 'white', color: 'var(--body)' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold mb-1" style={{ color: 'var(--primary)' }}>Maghrib</label>
+                      <input
+                        type="time"
+                        value={customMaghrib}
+                        onChange={async (e) => {
+                          setCustomMaghrib(e.target.value);
+                          await setSetting('customMaghrib', e.target.value);
+                        }}
+                        className="w-full rounded-lg px-3 py-2 text-base border focus:outline-none"
+                        style={{ border: '1.5px solid #E2E8F0', background: 'white', color: 'var(--body)' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handleDisableLocation}
                   className="text-xs text-[var(--muted)] underline hover:text-red-500 transition-colors"
