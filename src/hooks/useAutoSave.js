@@ -7,6 +7,7 @@ export function useAutoSave(store, id, defaultValue) {
   const [showSaved, setShowSaved] = useState(false);
   const timerRef = useRef(null);
   const savedTimerRef = useRef(null);
+  const lastShownRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +26,13 @@ export function useAutoSave(store, id, defaultValue) {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         setData(store, next).then(() => {
-          setShowSaved(true);
-          if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
-          savedTimerRef.current = setTimeout(() => setShowSaved(false), 1300);
+          const now = Date.now();
+          if (now - lastShownRef.current > 4000) {
+            lastShownRef.current = now;
+            setShowSaved(true);
+            if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+            savedTimerRef.current = setTimeout(() => setShowSaved(false), 1300);
+          }
         });
       }, 500);
       return next;
