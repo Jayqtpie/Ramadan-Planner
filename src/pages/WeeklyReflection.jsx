@@ -33,10 +33,10 @@ export default function WeeklyReflection() {
         <button onClick={() => navigate('/reflect')} className="flex items-center gap-1 text-white/70 text-sm mb-3 hover:text-white">
           <ChevronLeft size={16} /> Back
         </button>
-        <p className="spaced-caps text-[var(--accent)] mb-1">Jumu'ah Review</p>
+        <p className="spaced-caps text-[var(--accent)] mb-1">Weekly Muhasabah</p>
         <h1 className="text-2xl font-extrabold">Week {week} Reflection</h1>
         <p className="text-white/60 text-sm mt-1">Days {WEEK_RANGES[week]}</p>
-        <p className="text-xs text-white/40 mt-1">Use this page every Friday to review your week and recalibrate.</p>
+        <p className="text-xs text-white/40 mt-1">Review your week, recalibrate your intentions, and set goals for the days ahead.</p>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">

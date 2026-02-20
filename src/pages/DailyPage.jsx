@@ -48,6 +48,7 @@ export default function DailyPage() {
 
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [filledDays, setFilledDays] = useState({});
+  const [isFriday, setIsFriday] = useState(false);
 
   // Persist the last visited day so the nav can resume here next time
   useEffect(() => { setSetting('lastDailyDay', day); }, [day]);
@@ -84,16 +85,16 @@ export default function DailyPage() {
     }
   }, [loaded, data?.id]);
 
-  // Auto-fill Gregorian date from Day 1's date
+  // Auto-fill Gregorian date from Day 1's date + detect if this day is a Friday
   useEffect(() => {
-    if (!loaded || !data || data.date) return;
-    if (day === 1) return; // Day 1 is set manually by the user
     getSetting('ramadanStartDate').then((startDate) => {
       if (startDate) {
         const d = new Date(startDate);
         d.setDate(d.getDate() + (day - 1));
-        const filled = d.toISOString().split('T')[0];
-        update({ ...data, date: filled });
+        setIsFriday(d.getDay() === 5); // 5 = Friday
+        if (!data?.date && day !== 1) {
+          update({ ...data, date: d.toISOString().split('T')[0] });
+        }
       }
     });
   }, [loaded, data?.id]);
@@ -316,6 +317,30 @@ export default function DailyPage() {
                     </div>
                   </div>
                 ))}
+                {isFriday && (
+                  <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+                    <input
+                      type="checkbox"
+                      className="custom-check"
+                      checked={data.salahTracker['jumuah']?.done || false}
+                      onChange={(e) => setSalah('jumuah', 'done', e.target.checked)}
+                      aria-label="Jumu'ah attended"
+                    />
+                    <span className="text-sm font-medium flex-1 min-w-0">Jumu'ah</span>
+                    <div className="on-time-toggle">
+                      <button
+                        type="button"
+                        className={data.salahTracker['jumuah']?.onTime === 'Y' ? 'yes' : ''}
+                        onClick={() => setSalah('jumuah', 'onTime', data.salahTracker['jumuah']?.onTime === 'Y' ? '' : 'Y')}
+                      >Y</button>
+                      <button
+                        type="button"
+                        className={data.salahTracker['jumuah']?.onTime === 'N' ? 'no' : ''}
+                        onClick={() => setSalah('jumuah', 'onTime', data.salahTracker['jumuah']?.onTime === 'N' ? '' : 'N')}
+                      >N</button>
+                    </div>
+                  </div>
+                )}
                 <div className="pt-2 border-t border-gray-100">
                   <StarRating label="Khushu':" value={data.khushuRating || 0} onChange={(v) => set('khushuRating', v)} />
                 </div>
