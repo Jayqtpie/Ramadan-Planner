@@ -4,7 +4,7 @@ import { shareProgress } from '../lib/shareProgress';
 import { getLocation, setupLocation, clearLocation } from '../lib/prayerTimes';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check } from 'lucide-react';
+import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check, Download } from 'lucide-react';
 
 const PRAYER_METHODS = [
   { id: '0', name: 'Shia Ithna-Ashari (Qum)' },
@@ -334,6 +334,41 @@ export default function Settings({ theme, onThemeChange }) {
                 <span className="text-xs text-[var(--muted)]">Share a summary via WhatsApp, iMessage, or other apps</span>
               </div>
             </button>
+          </div>
+        </div>
+
+        {/* PDF Planners */}
+        <div className="card animate-fade-in-up" style={{ animationDelay: '0.18s' }}>
+          <div className="section-bar section-bar-gold">
+            <span>●</span> <span>PRINTABLE PLANNERS</span>
+          </div>
+          <div className="card-body">
+            <p className="text-xs text-[var(--muted)] mb-3 leading-relaxed">
+              Download your beautifully designed printable Ramadan planners — all 3 editions included with your purchase.
+            </p>
+            <div className="space-y-2">
+              {[
+                { label: 'Standard Edition', desc: 'Classic teal & gold design', file: '/ramadan-planner-standard.pdf' },
+                { label: 'Midnight Edition', desc: 'Deep dark theme', file: '/ramadan-planner-midnight.pdf' },
+                { label: 'Rose Edition', desc: 'Soft pink & gold design', file: '/ramadan-planner-rose.pdf' },
+              ].map(({ label, desc, file }) => (
+                <a
+                  key={file}
+                  href={file}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 no-underline"
+                  style={{ border: '1.5px solid #E2E8F0', display: 'flex' }}
+                >
+                  <Download size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                  <div className="text-left flex-1">
+                    <span className="text-sm font-bold block" style={{ color: 'var(--body)' }}>{label}</span>
+                    <span className="text-xs text-[var(--muted)]">{desc}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
