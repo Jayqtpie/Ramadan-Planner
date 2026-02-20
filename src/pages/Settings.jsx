@@ -102,7 +102,7 @@ export default function Settings({ theme, onThemeChange }) {
       const shareFile = new File([blob], `${label}.pdf`, { type: 'application/pdf' });
       // Use Web Share API with file on iOS PWA — avoids the black screen trap
       if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
-        await navigator.share({ files: [shareFile], title: label });
+        await navigator.share({ files: [shareFile] });
       } else {
         // Desktop / Android fallback — standard anchor download
         const url = URL.createObjectURL(blob);
