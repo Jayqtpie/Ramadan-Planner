@@ -146,7 +146,7 @@ export default function LastTenNights() {
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         <div className="hadith-block">
           <p className="text-sm leading-relaxed italic">
-            "The Prophet (peace be upon him) used to strive more in worship during the last ten days of Ramadan than at any other time."
+            "The Prophet ﷺ used to strive more in worship during the last ten days of Ramadan than at any other time."
           </p>
           <p className="text-xs text-[var(--muted)] mt-2 not-italic">— Sahih Muslim</p>
         </div>
