@@ -92,7 +92,6 @@ export default function Settings({ theme, onThemeChange }) {
 
   const [downloadsOpen, setDownloadsOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
 
   const [exporting, setExporting] = useState(false);
 
@@ -427,31 +426,21 @@ export default function Settings({ theme, onThemeChange }) {
 
         {/* About */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
-          <button
-            onClick={() => setAboutOpen(!aboutOpen)}
-            className="section-bar section-bar-dark w-full justify-between cursor-pointer border-none text-left"
-            type="button"
-          >
-            <div className="flex items-center gap-2">
-              <Info size={16} />
-              <span>ABOUT</span>
-            </div>
-            <ChevronDown size={18} className="transition-transform duration-200" style={{ transform: aboutOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-          </button>
-          {aboutOpen && (
-            <div className="card-body text-center">
-              <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>The Ramadan Reset Planner</p>
-              <p className="text-xs text-[var(--muted)] mt-1">by GuidedBarakah</p>
-              <p className="text-xs text-[var(--muted)] mt-1">www.guidedbarakah.com</p>
-              <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
-              <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
-                All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
-              </p>
-              <p className="text-xs text-[var(--muted)] mt-2">
-                Need help? <a href="mailto:jay@guidedbarakah.com" className="underline" style={{ color: 'var(--accent)' }}>jay@guidedbarakah.com</a>
-              </p>
-            </div>
-          )}
+          <div className="section-bar section-bar-dark">
+            <Info size={16} /> <span>ABOUT</span>
+          </div>
+          <div className="card-body text-center">
+            <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>The Ramadan Reset Planner</p>
+            <p className="text-xs text-[var(--muted)] mt-1">by GuidedBarakah</p>
+            <p className="text-xs text-[var(--muted)] mt-1">www.guidedbarakah.com</p>
+            <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
+            <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
+              All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
+            </p>
+            <p className="text-xs text-[var(--muted)] mt-2">
+              Need help? <a href="mailto:jay@guidedbarakah.com" className="underline" style={{ color: 'var(--accent)' }}>jay@guidedbarakah.com</a>
+            </p>
+          </div>
         </div>
       </div>
 
