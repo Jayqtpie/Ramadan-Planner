@@ -286,6 +286,11 @@ export default function DailyPage() {
             <div className="card">
               <SectionBar variant="primary" icon="✸">SALAH TRACKER</SectionBar>
               <div className="card-body space-y-2">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-gray-100">
+                  <div className="w-4 flex-shrink-0" />
+                  <span className="text-[0.65rem] font-bold uppercase tracking-wide flex-1" style={{ color: 'var(--muted)' }}>Prayer</span>
+                  <span className="text-[0.65rem] font-bold uppercase tracking-wide pr-0.5" style={{ color: 'var(--muted)' }}>On time?</span>
+                </div>
                 {PRAYERS.map((p) => (
                   <div key={p.key} className="flex items-center gap-2">
                     <input
