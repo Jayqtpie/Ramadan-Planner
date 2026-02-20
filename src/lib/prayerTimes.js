@@ -126,27 +126,14 @@ export async function clearLocation() {
 
 /**
  * Get Fajr and Maghrib times for a specific Ramadan day.
- * Uses a base date (1 Ramadan) + day offset.
+ * Uses a base date (1 Ramadan) + day offset, fetching from the Aladhan API.
  * Returns { fajr: "HH:MM", maghrib: "HH:MM" } or null if location not set.
- *
- * Reads prayerMethod from IndexedDB. If method is 'custom', returns
- * the manually entered customFajr / customMaghrib times directly.
  */
 export async function getPrayerTimesForDay(day) {
   const location = await getLocation();
   if (!location?.lat) return null;
 
   const method = (await getSetting('prayerMethod')) || '3';
-
-  // Custom times — return immediately without hitting the API
-  if (method === 'custom') {
-    const fajr = (await getSetting('customFajr')) || '';
-    const maghrib = (await getSetting('customMaghrib')) || '';
-    if (fajr || maghrib) {
-      return { fajr, maghrib };
-    }
-    return null;
-  }
 
   // Ramadan 2026 starts approximately 17 Feb 2026
   const ramadanStart = await getSetting('ramadanStartDate');

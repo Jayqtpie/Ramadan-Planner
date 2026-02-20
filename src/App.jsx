@@ -140,17 +140,29 @@ function Loader() {
   );
 }
 
-const NAV_ITEMS = [
-  { path: '/', icon: HomeIcon, label: 'Home', match: ['/'] },
-  { path: '/daily/1', icon: BookOpen, label: 'Daily', match: ['/daily'] },
-  { path: '/tracker', icon: BookMarked, label: 'Tracker', match: ['/tracker'] },
-  { path: '/reflect', icon: Moon, label: 'Reflect', match: ['/reflect'] },
-  { path: '/settings', icon: SettingsIcon, label: 'Settings', match: ['/settings'] },
-];
-
 function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [lastDay, setLastDay] = useState(1);
+
+  // Load persisted last day on mount
+  useEffect(() => {
+    getSetting('lastDailyDay').then((d) => { if (d) setLastDay(d); });
+  }, []);
+
+  // Keep lastDay in sync as the user browses daily pages
+  useEffect(() => {
+    const match = location.pathname.match(/^\/daily\/(\d+)$/);
+    if (match) setLastDay(parseInt(match[1]));
+  }, [location.pathname]);
+
+  const NAV_ITEMS = [
+    { path: '/', icon: HomeIcon, label: 'Home', match: ['/'] },
+    { path: `/daily/${lastDay}`, icon: BookOpen, label: 'Daily', match: ['/daily'] },
+    { path: '/tracker', icon: BookMarked, label: 'Tracker', match: ['/tracker'] },
+    { path: '/reflect', icon: Moon, label: 'Reflect', match: ['/reflect'] },
+    { path: '/settings', icon: SettingsIcon, label: 'Settings', match: ['/settings'] },
+  ];
 
   return (
     <nav className="bottom-nav" role="navigation" aria-label="Main navigation">
@@ -160,7 +172,7 @@ function BottomNav() {
         );
         return (
           <button
-            key={item.path}
+            key={item.label}
             className={active ? 'active' : ''}
             onClick={() => navigate(item.path)}
             aria-label={item.label}

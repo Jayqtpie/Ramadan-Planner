@@ -49,6 +49,9 @@ export default function DailyPage() {
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [filledDays, setFilledDays] = useState({});
 
+  // Persist the last visited day so the nav can resume here next time
+  useEffect(() => { setSetting('lastDailyDay', day); }, [day]);
+
   useEffect(() => {
     getAllData('dailyPages').then((pages) => {
       const filled = {};

@@ -30,7 +30,6 @@ const PRAYER_METHODS = [
   { id: '21', name: 'Morocco' },
   { id: '22', name: 'Comunidade Islamica de Lisboa' },
   { id: '23', name: 'Jordan' },
-  { id: 'custom', name: 'Custom (enter times manually)' },
 ];
 
 const THEMES = [
@@ -47,8 +46,6 @@ export default function Settings({ theme, onThemeChange }) {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationLoaded, setLocationLoaded] = useState(false);
   const [prayerMethod, setPrayerMethod] = useState('3');
-  const [customFajr, setCustomFajr] = useState('');
-  const [customMaghrib, setCustomMaghrib] = useState('');
   const [lastBackupDate, setLastBackupDate] = useState(null);
   const [isStandalone] = useState(() =>
     window.matchMedia('(display-mode: standalone)').matches ||
@@ -64,8 +61,6 @@ export default function Settings({ theme, onThemeChange }) {
       if (d) setLastBackupDate(d);
     });
     getSetting('prayerMethod').then((m) => { if (m) setPrayerMethod(m); });
-    getSetting('customFajr').then((v) => { if (v) setCustomFajr(v); });
-    getSetting('customMaghrib').then((v) => { if (v) setCustomMaghrib(v); });
   }, []);
 
   const handleEnableLocation = async () => {
@@ -282,38 +277,6 @@ export default function Settings({ theme, onThemeChange }) {
                     Auto-selected based on your location. Change if your masjid uses a different method.
                   </p>
                 </div>
-
-                {/* Custom time inputs */}
-                {prayerMethod === 'custom' && (
-                  <div className="mb-3 grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold mb-1" style={{ color: 'var(--primary)' }}>Fajr</label>
-                      <input
-                        type="time"
-                        value={customFajr}
-                        onChange={async (e) => {
-                          setCustomFajr(e.target.value);
-                          await setSetting('customFajr', e.target.value);
-                        }}
-                        className="w-full rounded-lg px-3 py-2 text-base border focus:outline-none"
-                        style={{ border: '1.5px solid #E2E8F0', background: 'white', color: 'var(--body)' }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold mb-1" style={{ color: 'var(--primary)' }}>Maghrib</label>
-                      <input
-                        type="time"
-                        value={customMaghrib}
-                        onChange={async (e) => {
-                          setCustomMaghrib(e.target.value);
-                          await setSetting('customMaghrib', e.target.value);
-                        }}
-                        className="w-full rounded-lg px-3 py-2 text-base border focus:outline-none"
-                        style={{ border: '1.5px solid #E2E8F0', background: 'white', color: 'var(--body)' }}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 <button
                   onClick={handleDisableLocation}
