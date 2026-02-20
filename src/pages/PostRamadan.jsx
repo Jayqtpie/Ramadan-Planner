@@ -65,13 +65,13 @@ export default function PostRamadan() {
               The Prophet ﷺ said: 'Whoever fasts Ramadan and follows it with six days of Shawwal, it is as if they fasted the entire year.' (Muslim)
             </p>
             <p className="text-sm font-bold mb-3">My 6 Shawwal Fast Days:</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {data.shawwalDays.map((d, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <input type="checkbox" className="custom-check" checked={d.completed} onChange={(e) => updateShawwal(i, 'completed', e.target.checked)} />
-                  <div className="flex-1">
+                  <input type="checkbox" className="custom-check flex-shrink-0" checked={d.completed} onChange={(e) => updateShawwal(i, 'completed', e.target.checked)} />
+                  <div className="flex-1 min-w-0">
                     <label className="text-xs text-[var(--muted)]">Day {i + 1}</label>
-                    <input type="date" value={d.date} onChange={(e) => updateShawwal(i, 'date', e.target.value)} className="text-xs" />
+                    <input type="date" value={d.date} onChange={(e) => updateShawwal(i, 'date', e.target.value)} className="text-xs w-full" />
                   </div>
                 </div>
               ))}
