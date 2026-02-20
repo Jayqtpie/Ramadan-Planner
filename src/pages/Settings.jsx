@@ -4,7 +4,7 @@ import { shareProgress } from '../lib/shareProgress';
 import { getLocation, setupLocation, clearLocation } from '../lib/prayerTimes';
 import SavedToast from '../components/SavedToast';
 import Footer from '../components/Footer';
-import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check, Download } from 'lucide-react';
+import { Upload, Trash2, Info, Smartphone, FileText, Printer, Share2, HardDriveDownload, MapPin, Check, Download, ChevronDown } from 'lucide-react';
 
 const PRAYER_METHODS = [
   { id: '0', name: 'Shia Ithna-Ashari (Qum)' },
@@ -89,6 +89,10 @@ export default function Settings({ theme, onThemeChange }) {
     setShowSaved(true);
     setTimeout(() => setShowSaved(false), 1300);
   };
+
+  const [downloadsOpen, setDownloadsOpen] = useState(false);
+  const [dataOpen, setDataOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const [exporting, setExporting] = useState(false);
 
@@ -306,124 +310,148 @@ export default function Settings({ theme, onThemeChange }) {
           </div>
         </div>
 
-        {/* Export & Share */}
+        {/* Downloads & Sharing */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-          <div className="section-bar section-bar-primary">
-            <span>●</span> <span>EXPORT & SHARE</span>
-          </div>
-          <div className="card-body space-y-3">
-            <button onClick={handleExportPdf} disabled={exporting} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 disabled:opacity-60" style={{ border: '1.5px solid #E2E8F0' }}>
-              <FileText size={18} style={{ color: 'var(--primary)' }} />
-              <div className="text-left flex-1">
-                <span className="text-sm font-bold block">Download PDF</span>
-                <span className="text-xs text-[var(--muted)]">Save your entire Ramadan journey as a beautiful PDF</span>
-              </div>
-              {exporting && <span className="text-xs text-[var(--muted)] animate-pulse">Creating...</span>}
-            </button>
-            <button onClick={handlePrint} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
-              <Printer size={18} style={{ color: 'var(--primary)' }} />
-              <div className="text-left">
-                <span className="text-sm font-bold block">Print This Page</span>
-                <span className="text-xs text-[var(--muted)]">Print or save as PDF using your browser</span>
-              </div>
-            </button>
-            <button onClick={handleShare} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
-              <Share2 size={18} style={{ color: 'var(--primary)' }} />
-              <div className="text-left">
-                <span className="text-sm font-bold block">Share Progress</span>
-                <span className="text-xs text-[var(--muted)]">Share a summary via WhatsApp, iMessage, or other apps</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* PDF Planners */}
-        <div className="card animate-fade-in-up" style={{ animationDelay: '0.18s' }}>
-          <div className="section-bar section-bar-gold">
-            <span>●</span> <span>PRINTABLE PLANNERS</span>
-          </div>
-          <div className="card-body">
-            <p className="text-xs text-[var(--muted)] mb-3 leading-relaxed">
-              Download your beautifully designed printable Ramadan planners — all 3 editions included with your purchase.
-            </p>
-            <div className="space-y-2">
-              {[
-                { label: 'Standard Edition', desc: 'Classic teal & gold design', file: '/ramadan-planner-standard.pdf' },
-                { label: 'Midnight Edition', desc: 'Deep dark theme', file: '/ramadan-planner-midnight.pdf' },
-                { label: 'Rose Edition', desc: 'Soft pink & gold design', file: '/ramadan-planner-rose.pdf' },
-              ].map(({ label, desc, file }) => (
-                <a
-                  key={file}
-                  href={file}
-                  download
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 no-underline"
-                  style={{ border: '1.5px solid #E2E8F0', display: 'flex' }}
-                >
-                  <Download size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                  <div className="text-left flex-1">
-                    <span className="text-sm font-bold block" style={{ color: 'var(--body)' }}>{label}</span>
-                    <span className="text-xs text-[var(--muted)]">{desc}</span>
-                  </div>
-                </a>
-              ))}
+          <button
+            onClick={() => setDownloadsOpen(!downloadsOpen)}
+            className="section-bar section-bar-primary w-full justify-between cursor-pointer border-none text-left"
+            type="button"
+          >
+            <div className="flex items-center gap-2">
+              <span>●</span>
+              <span>DOWNLOADS & SHARING</span>
             </div>
-          </div>
+            <ChevronDown size={18} className="transition-transform duration-200" style={{ transform: downloadsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+          </button>
+          {downloadsOpen && (
+            <div className="card-body space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Your Journey</p>
+                <button onClick={handleExportPdf} disabled={exporting} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 disabled:opacity-60" style={{ border: '1.5px solid #E2E8F0' }}>
+                  <FileText size={18} style={{ color: 'var(--primary)' }} />
+                  <div className="text-left flex-1">
+                    <span className="text-sm font-bold block">Export as PDF</span>
+                    <span className="text-xs text-[var(--muted)]">Save your entire Ramadan journey as a PDF</span>
+                  </div>
+                  {exporting && <span className="text-xs text-[var(--muted)] animate-pulse">Creating...</span>}
+                </button>
+                <button onClick={handlePrint} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+                  <Printer size={18} style={{ color: 'var(--primary)' }} />
+                  <div className="text-left">
+                    <span className="text-sm font-bold block">Print This Page</span>
+                    <span className="text-xs text-[var(--muted)]">Print or save as PDF using your browser</span>
+                  </div>
+                </button>
+                <button onClick={handleShare} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+                  <Share2 size={18} style={{ color: 'var(--primary)' }} />
+                  <div className="text-left">
+                    <span className="text-sm font-bold block">Share Progress</span>
+                    <span className="text-xs text-[var(--muted)]">Share a summary via WhatsApp, iMessage, or other apps</span>
+                  </div>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Printable Planners</p>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">All 3 editions are included with your purchase.</p>
+                {[
+                  { label: 'Standard Edition', desc: 'Classic teal & gold design', file: '/ramadan-planner-standard.pdf' },
+                  { label: 'Midnight Edition', desc: 'Deep dark theme', file: '/ramadan-planner-midnight.pdf' },
+                  { label: 'Rose Edition', desc: 'Soft pink & gold design', file: '/ramadan-planner-rose.pdf' },
+                ].map(({ label, desc, file }) => (
+                  <a
+                    key={file}
+                    href={file}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 no-underline"
+                    style={{ border: '1.5px solid #E2E8F0', display: 'flex' }}
+                  >
+                    <Download size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                    <div className="text-left flex-1">
+                      <span className="text-sm font-bold block" style={{ color: 'var(--body)' }}>{label}</span>
+                      <span className="text-xs text-[var(--muted)]">{desc}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Data Management */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="section-bar section-bar-dark">
-            <span>●</span> <span>DATA MANAGEMENT</span>
-          </div>
-          <div className="card-body space-y-3">
-            <button onClick={handleBackup} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
-              <HardDriveDownload size={18} style={{ color: 'var(--primary)' }} />
-              <div className="text-left">
-                <span className="text-sm font-bold block">Backup Data</span>
-                <span className="text-xs text-[var(--muted)]">Download a backup file to restore later</span>
-              </div>
-            </button>
-            <button onClick={handleImport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
-              <Upload size={18} style={{ color: 'var(--primary)' }} />
-              <div className="text-left">
-                <span className="text-sm font-bold block">Restore Backup</span>
-                <span className="text-xs text-[var(--muted)]">Restore from a previously downloaded backup</span>
-              </div>
-            </button>
-            <p className="text-[0.65rem] text-[var(--muted)] text-center">
-              {lastBackupDate
-                ? `Last backup: ${formatBackupDate(lastBackupDate)}`
-                : 'No backups yet — your data only lives on this device'}
-            </p>
-            <button onClick={() => setShowResetConfirm(true)} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-red-50" style={{ border: '1.5px solid #FCA5A5' }}>
-              <Trash2 size={18} className="text-red-500" />
-              <div className="text-left">
-                <span className="text-sm font-bold block text-red-600">Reset All Data</span>
-                <span className="text-xs text-[var(--muted)]">Clear all entries and start fresh</span>
-              </div>
-            </button>
-          </div>
+          <button
+            onClick={() => setDataOpen(!dataOpen)}
+            className="section-bar section-bar-dark w-full justify-between cursor-pointer border-none text-left"
+            type="button"
+          >
+            <div className="flex items-center gap-2">
+              <span>●</span>
+              <span>DATA MANAGEMENT</span>
+            </div>
+            <ChevronDown size={18} className="transition-transform duration-200" style={{ transform: dataOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+          </button>
+          {dataOpen && (
+            <div className="card-body space-y-3">
+              <button onClick={handleBackup} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+                <HardDriveDownload size={18} style={{ color: 'var(--primary)' }} />
+                <div className="text-left">
+                  <span className="text-sm font-bold block">Backup Data</span>
+                  <span className="text-xs text-[var(--muted)]">Download a backup file to restore later</span>
+                </div>
+              </button>
+              <button onClick={handleImport} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50" style={{ border: '1.5px solid #E2E8F0' }}>
+                <Upload size={18} style={{ color: 'var(--primary)' }} />
+                <div className="text-left">
+                  <span className="text-sm font-bold block">Restore Backup</span>
+                  <span className="text-xs text-[var(--muted)]">Restore from a previously downloaded backup</span>
+                </div>
+              </button>
+              <p className="text-[0.65rem] text-[var(--muted)] text-center">
+                {lastBackupDate
+                  ? `Last backup: ${formatBackupDate(lastBackupDate)}`
+                  : 'No backups yet — your data only lives on this device'}
+              </p>
+              <button onClick={() => setShowResetConfirm(true)} className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-red-50" style={{ border: '1.5px solid #FCA5A5' }}>
+                <Trash2 size={18} className="text-red-500" />
+                <div className="text-left">
+                  <span className="text-sm font-bold block text-red-600">Reset All Data</span>
+                  <span className="text-xs text-[var(--muted)]">Clear all entries and start fresh</span>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* About */}
         <div className="card animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
-          <div className="section-bar section-bar-dark">
-            <Info size={16} /> <span>ABOUT</span>
-          </div>
-          <div className="card-body text-center">
-            <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>The Ramadan Reset Planner</p>
-            <p className="text-xs text-[var(--muted)] mt-1">by GuidedBarakah</p>
-            <p className="text-xs text-[var(--muted)] mt-1">www.guidedbarakah.com</p>
-            <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
-            <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
-              All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
-            </p>
-            <p className="text-xs text-[var(--muted)] mt-2">
-              Need help? <a href="mailto:jay@guidedbarakah.com" className="underline" style={{ color: 'var(--accent)' }}>jay@guidedbarakah.com</a>
-            </p>
-          </div>
+          <button
+            onClick={() => setAboutOpen(!aboutOpen)}
+            className="section-bar section-bar-dark w-full justify-between cursor-pointer border-none text-left"
+            type="button"
+          >
+            <div className="flex items-center gap-2">
+              <Info size={16} />
+              <span>ABOUT</span>
+            </div>
+            <ChevronDown size={18} className="transition-transform duration-200" style={{ transform: aboutOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+          </button>
+          {aboutOpen && (
+            <div className="card-body text-center">
+              <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>The Ramadan Reset Planner</p>
+              <p className="text-xs text-[var(--muted)] mt-1">by GuidedBarakah</p>
+              <p className="text-xs text-[var(--muted)] mt-1">www.guidedbarakah.com</p>
+              <p className="text-[0.65rem] text-[var(--muted)] mt-2">&copy; GuidedBarakah 2026. All rights reserved.</p>
+              <p className="text-xs text-[var(--muted)] mt-3 leading-relaxed">
+                All data stays on your device. No server, no sync, no cloud. Your privacy is protected.
+              </p>
+              <p className="text-xs text-[var(--muted)] mt-2">
+                Need help? <a href="mailto:jay@guidedbarakah.com" className="underline" style={{ color: 'var(--accent)' }}>jay@guidedbarakah.com</a>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
