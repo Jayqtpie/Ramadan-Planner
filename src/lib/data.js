@@ -24,7 +24,7 @@ export const HADITHS = [
   { text: "The most beloved deed to Allah is the most regular and constant even if it were little.", source: "Sahih al-Bukhari, 6464" },
   { text: "Take advantage of five before five: your youth before your old age, your health before your illness, your wealth before your poverty, your free time before your busyness, and your life before your death.", source: "Tirmidhi, Al-Hakim" },
   { text: "The best of charity is that given in Ramadan.", source: "Tirmidhi, 663" },
-  { text: "The Messenger of Allah (peace be upon him) was the most generous of people, and he was most generous in Ramadan.", source: "Sahih al-Bukhari, 1902" },
+  { text: "The Messenger of Allah ﷺ was the most generous of people, and he was most generous in Ramadan.", source: "Sahih al-Bukhari, 1902" },
   { text: "Seek Laylat al-Qadr in the odd nights of the last ten days of Ramadan.", source: "Sahih al-Bukhari, 2017" },
   { text: "Smiling in the face of your brother is an act of charity.", source: "Tirmidhi, 1956" },
   { text: "The believer does not insult, curse, or speak in an obscene or foul manner.", source: "Tirmidhi, 1977" },
