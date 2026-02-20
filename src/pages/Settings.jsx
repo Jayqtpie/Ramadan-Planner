@@ -92,6 +92,34 @@ export default function Settings({ theme, onThemeChange }) {
 
   const [downloadsOpen, setDownloadsOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(null);
+
+  const handlePlannerDownload = async (file, label) => {
+    setDownloadingPdf(label);
+    try {
+      const response = await fetch(file);
+      const blob = await response.blob();
+      const shareFile = new File([blob], `${label}.pdf`, { type: 'application/pdf' });
+      // Use Web Share API with file on iOS PWA — avoids the black screen trap
+      if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+        await navigator.share({ files: [shareFile], title: label });
+      } else {
+        // Desktop / Android fallback — standard anchor download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${label}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Download failed:', err);
+        alert('Download failed. Please try again.');
+      }
+    }
+    setDownloadingPdf(null);
+  };
 
   const [exporting, setExporting] = useState(false);
 
@@ -358,21 +386,22 @@ export default function Settings({ theme, onThemeChange }) {
                   { label: 'Midnight Edition', desc: 'Deep dark theme', file: '/ramadan-planner-midnight.pdf' },
                   { label: 'Rose Edition', desc: 'Soft pink & gold design', file: '/ramadan-planner-rose.pdf' },
                 ].map(({ label, desc, file }) => (
-                  <a
+                  <button
                     key={file}
-                    href={file}
-                    download
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 no-underline"
-                    style={{ border: '1.5px solid #E2E8F0', display: 'flex' }}
+                    onClick={() => handlePlannerDownload(file, label)}
+                    disabled={downloadingPdf === label}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-50 disabled:opacity-60 text-left"
+                    style={{ border: '1.5px solid #E2E8F0' }}
                   >
                     <Download size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    <div className="text-left flex-1">
+                    <div className="flex-1">
                       <span className="text-sm font-bold block" style={{ color: 'var(--body)' }}>{label}</span>
                       <span className="text-xs text-[var(--muted)]">{desc}</span>
                     </div>
-                  </a>
+                    {downloadingPdf === label && (
+                      <span className="text-xs text-[var(--muted)] animate-pulse flex-shrink-0">Loading...</span>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
