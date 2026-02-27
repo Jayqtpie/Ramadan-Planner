@@ -230,7 +230,8 @@ export default function DailyPage() {
       </div>
 
       {/* Day selector strip */}
-      <div className="overflow-x-auto py-3 px-2 flex gap-1.5 border-b border-gray-100 relative">
+      <div className="overflow-x-auto py-3 px-2 border-b border-gray-100">
+        <div className="flex gap-1.5 min-w-max mx-auto">
         {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
           <button
             key={d}
@@ -251,6 +252,7 @@ export default function DailyPage() {
             )}
           </button>
         ))}
+        </div>
       </div>
 
       {/* Jump to today pill */}
