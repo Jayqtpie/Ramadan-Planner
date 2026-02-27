@@ -31,8 +31,10 @@ export default function Home() {
     ]).then(([niyyah, dailyPages]) => {
       // Check if niyyah has meaningful content
       const niyyahExists = niyyah && (
-        (niyyah.intention && niyyah.intention.trim()) ||
-        (niyyah.dua && niyyah.dua.trim())
+        (niyyah.whyFasting && niyyah.whyFasting.trim()) ||
+        (niyyah.leaveBehind && niyyah.leaveBehind.trim()) ||
+        (niyyah.personalDua && niyyah.personalDua.trim()) ||
+        (niyyah.habitsToBuild && niyyah.habitsToBuild.some((h) => h.text && h.text.trim()))
       );
       setHasNiyyah(!!niyyahExists);
 
@@ -40,7 +42,7 @@ export default function Home() {
       const logged = (dailyPages || []).filter((page) => {
         if (page.muhasabahResponse && page.muhasabahResponse.trim()) return true;
         if (page.todaysNiyyah && page.todaysNiyyah.trim()) return true;
-        if (page.salah && page.salah.some((s) => s.done)) return true;
+        if (page.salahTracker && Object.values(page.salahTracker).some((s) => s.done)) return true;
         return false;
       }).length;
       setDaysLogged(logged);
