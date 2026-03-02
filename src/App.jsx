@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { getSetting, setSetting } from './lib/db';
 import { Home as HomeIcon, BookOpen, BookMarked, Moon, Settings as SettingsIcon, Lock } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import unlockLogo from './assets/logo-full.png';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -216,6 +217,7 @@ function AppContent({ theme, setTheme }) {
         </Suspense>
       </div>
       <BottomNav />
+      <Analytics />
     </>
   );
 }
